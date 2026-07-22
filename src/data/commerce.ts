@@ -22,6 +22,8 @@ export const orderStatusCopy: Record<OrderStatus, { en: string; th: string }> = 
   preparing: { en: "Preparing", th: "กำลังจัดเตรียม" },
   shipped: { en: "Shipped", th: "จัดส่งแล้ว" },
   cancelled: { en: "Cancelled", th: "ยกเลิก" },
+  refund_pending: { en: "Refund in progress", th: "กำลังคืนเงิน" },
+  refunded: { en: "Refunded", th: "คืนเงินแล้ว" },
 };
 
 export function getCountry(code: CountryCode) {

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import type { Product } from "@/data/catalog";
 import { FirstVisitLanguage } from "@/components/first-visit-language";
 import { createClient } from "@/lib/supabase/client";
-import type { CartLine, CheckoutAddress, CountryCode, CurrencyCode, CustomerOrder, Locale, OrderStatus, ShopPreferences } from "@/types/shop";
+import type { CartLine, CheckoutAddress, CountryCode, CurrencyCode, CustomerOrder, Locale, OrderStatus, PaymentInstructions, ShopPreferences } from "@/types/shop";
 
 type ShopState = {
   preferences: ShopPreferences;
@@ -46,6 +46,7 @@ type DbOrder = {
   subtotal_thb: number | string;
   shipping_fee_thb: number | string | null;
   payment_method: "bank_transfer" | "western_union";
+  payment_instructions?: PaymentInstructions | null;
   shipping_company: string | null;
   tracking_number: string | null;
   order_items: Array<{
@@ -131,6 +132,7 @@ function mapOrder(order: DbOrder): CustomerOrder {
     subtotalThb: Number(order.subtotal_thb),
     shippingFeeThb: order.shipping_fee_thb === null ? null : Number(order.shipping_fee_thb),
     paymentMethod: order.payment_method,
+    paymentInstructions: order.payment_instructions ?? {},
     paymentProofName: paymentProof && paymentProof.status !== "rejected" ? "Receipt uploaded" : undefined,
     paymentProofStatus: paymentProof?.status,
     paymentRejectionReason: paymentProof?.rejection_reason ?? undefined,
@@ -151,11 +153,11 @@ export function ShopProvider({ children, catalogProducts }: { children: React.Re
   const loadOrders = useCallback(async () => {
     const currentResult = await supabase
       .from("orders")
-      .select("id, order_number, created_at, status, customer_name, customer_phone, shipping_country, shipping_address, shipping_city, postal_code, currency, exchange_rate_from_thb, subtotal_thb, shipping_fee_thb, payment_method, shipping_company, tracking_number, order_items(id, product_id, product_name_snapshot, sku_snapshot, quantity, unit_price_thb), payment_proofs(storage_path, status, rejection_reason)")
+      .select("id, order_number, created_at, status, customer_name, customer_phone, shipping_country, shipping_address, shipping_city, postal_code, currency, exchange_rate_from_thb, subtotal_thb, shipping_fee_thb, payment_method, payment_instructions, shipping_company, tracking_number, order_items(id, product_id, product_name_snapshot, sku_snapshot, quantity, unit_price_thb), payment_proofs(storage_path, status, rejection_reason)")
       .order("created_at", { ascending: false });
     let orderData: unknown = currentResult.data;
     let loadError: { message: string } | null = currentResult.error;
-    if (loadError?.message.includes("rejection_reason")) {
+    if (loadError?.message.includes("rejection_reason") || loadError?.message.includes("payment_instructions")) {
       const legacyResult = await supabase
         .from("orders")
         .select("id, order_number, created_at, status, customer_name, customer_phone, shipping_country, shipping_address, shipping_city, postal_code, currency, exchange_rate_from_thb, subtotal_thb, shipping_fee_thb, payment_method, shipping_company, tracking_number, order_items(id, product_id, product_name_snapshot, sku_snapshot, quantity, unit_price_thb), payment_proofs(storage_path, status)")

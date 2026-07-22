@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
 export type AdminLoginState = { error: string };
@@ -23,6 +24,11 @@ export async function loginAdmin(_state: AdminLoginState, formData: FormData): P
     await supabase.auth.signOut();
     return { error: "บัญชีนี้ไม่ได้รับสิทธิ์ผู้ดูแลระบบ" };
   }
+
+  const requestHeaders = await headers();
+  await supabase.rpc("admin_record_login", {
+    p_user_agent: requestHeaders.get("user-agent")?.slice(0, 500) ?? "",
+  });
 
   redirect("/admin");
 }

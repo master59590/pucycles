@@ -8,4 +8,6 @@ export const adminOrderStatusCopy: Record<OrderStatus, string> = {
   preparing: "กำลังเตรียมสินค้า",
   shipped: "จัดส่งแล้ว",
   cancelled: "ยกเลิกแล้ว",
+  refund_pending: "กำลังคืนเงิน",
+  refunded: "คืนเงินแล้ว",
 };

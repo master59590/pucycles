@@ -19,7 +19,20 @@ export type OrderStatus =
   | "paid"
   | "preparing"
   | "shipped"
-  | "cancelled";
+  | "cancelled"
+  | "refund_pending"
+  | "refunded";
+
+export type PaymentInstructions = {
+  bank_name?: string;
+  account_name?: string;
+  account_number?: string;
+  receiver_name?: string;
+  country?: string;
+  city?: string;
+  phone?: string;
+  instructions?: string;
+};
 
 export type CheckoutAddress = {
   name: string;
@@ -50,6 +63,7 @@ export type CustomerOrder = {
   subtotalThb: number;
   shippingFeeThb: number | null;
   paymentMethod: "bank_transfer" | "western_union";
+  paymentInstructions: PaymentInstructions;
   paymentProofName?: string;
   paymentProofStatus?: "pending" | "approved" | "rejected";
   paymentRejectionReason?: string;

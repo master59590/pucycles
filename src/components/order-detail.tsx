@@ -17,13 +17,6 @@ const timeline: Array<{ status: OrderStatus; label: string; icon: typeof Clock3 
   { status: "shipped", label: "Shipped", icon: Truck },
 ];
 
-const thaiBankAccount = {
-  bank: "ธนาคารกสิกรไทย",
-  accountName: "จุฑารัตน์ อินทรณรงค์",
-  accountNumber: "0348696793",
-  formattedAccountNumber: "034-8-69679-3",
-};
-
 export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: string; user: CustomerUser; isAdmin: boolean }) {
   const { orders, preferences, hydrated, submitPayment, cancelOrder, updateOrderAddress, products } = useShop();
   const order = orders.find((item) => item.orderNumber === orderNumber);
@@ -52,6 +45,7 @@ export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: strin
   const canChange = ["waiting_payment", "shipping_quote"].includes(order.status);
   const totalThb = order.subtotalThb + (order.shippingFeeThb ?? 0);
   const isThaiBankTransfer = order.address.countryCode === "TH" && order.paymentMethod === "bank_transfer";
+  const payment = order.paymentInstructions;
   const selectFile = (selected?: File) => {
     setFileError("");
     if (!selected) return setFile(null);
@@ -86,7 +80,8 @@ export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: strin
     window.setTimeout(() => setCopiedTracking(false), 1400);
   };
   const copyBankAccount = async () => {
-    await navigator.clipboard.writeText(thaiBankAccount.accountNumber);
+    if (!payment.account_number) return;
+    await navigator.clipboard.writeText(payment.account_number);
     setCopiedBankAccount(true);
     window.setTimeout(() => setCopiedBankAccount(false), 1400);
   };
@@ -100,7 +95,10 @@ export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: strin
       </div>
       {actionError && <p className="field-error" role="alert">{actionError}</p>}
 
-      {order.status !== "cancelled" && <div className="order-timeline">{timeline.map(({ status, label, icon: Icon }, index) => {
+      {order.status === "refund_pending" && <section className="action-panel waiting"><Clock3 /><div><h2>Refund in progress</h2><p>The store is processing the refund manually. Please contact the store if you need an update.</p></div></section>}
+      {order.status === "refunded" && <section className="action-panel success"><Check /><div><h2>Refund completed</h2><p>The store has recorded this order as refunded.</p></div></section>}
+
+      {!(["cancelled", "refund_pending", "refunded"] as OrderStatus[]).includes(order.status) && <div className="order-timeline">{timeline.map(({ status, label, icon: Icon }, index) => {
         const currentIndex = timeline.findIndex((item) => item.status === order.status);
         const active = order.status === "paid" ? index <= 1 : currentIndex >= index;
         return <div className={active ? "active" : ""} key={status}><span><Icon /></span><strong>{label}</strong></div>;
@@ -125,11 +123,11 @@ export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: strin
             {isThaiBankTransfer ? <div className="thai-bank-details">
               <div><span>ยอดที่ต้องโอน</span><strong>{formatMoney(totalThb, "TH", "th")}</strong></div>
               <dl>
-                <div><dt>ธนาคาร</dt><dd>{thaiBankAccount.bank}</dd></div>
-                <div><dt>ชื่อบัญชี</dt><dd>{thaiBankAccount.accountName}</dd></div>
-                <div className="bank-account-number"><dt>เลขบัญชี</dt><dd><strong>{thaiBankAccount.formattedAccountNumber}</strong><button type="button" onClick={() => void copyBankAccount()} aria-label="คัดลอกเลขบัญชี" title="คัดลอกเลขบัญชี">{copiedBankAccount ? <Check /> : <Copy />}</button></dd></div>
+                <div><dt>ธนาคาร</dt><dd>{payment.bank_name || "กรุณาติดต่อร้านค้า"}</dd></div>
+                <div><dt>ชื่อบัญชี</dt><dd>{payment.account_name || "กรุณาติดต่อร้านค้า"}</dd></div>
+                <div className="bank-account-number"><dt>เลขบัญชี</dt><dd><strong>{payment.account_number || "กรุณาติดต่อร้านค้า"}</strong>{payment.account_number && <button type="button" onClick={() => void copyBankAccount()} aria-label="คัดลอกเลขบัญชี" title="คัดลอกเลขบัญชี">{copiedBankAccount ? <Check /> : <Copy />}</button>}</dd></div>
               </dl>
-            </div> : <div className="payment-instructions"><strong>PUCYCLES receiver details</strong><p>Contact the store if you need the Western Union receiver information again.</p></div>}
+            </div> : <div className="payment-instructions"><strong>Western Union receiver</strong><p>{payment.receiver_name || "Contact the store for receiver information"}</p>{payment.city && <p>{payment.city}, {payment.country}</p>}{payment.phone && <p>{payment.phone}</p>}{payment.instructions && <p>{payment.instructions}</p>}</div>}
             <label className="proof-upload"><Upload /><span>{file ? file.name : "Choose receipt image"}<small>JPG, PNG or WEBP - Max 5 MB</small></span><input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={(event) => selectFile(event.target.files?.[0])} /></label>
             {fileError && <p className="field-error">{fileError}</p>}
             <button className="shop-primary-button" disabled={!file || busy} onClick={uploadProof}>{busy ? "Uploading..." : "Submit payment proof"}</button>
