@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock3, KeyRound, Landmark, LogOut, Pencil, Plus, RefreshCw, Save, ShieldCheck, Trash2, Truck, WalletCards, X } from "lucide-react";
+import { Clock3, Landmark, LogOut, Pencil, Plus, RefreshCw, Save, ShieldCheck, Trash2, Truck, WalletCards, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { ShippingCarrier } from "@/lib/admin-convenience-types";
@@ -11,7 +11,6 @@ type Props = {
   thaiShippingFeeThb: number;
   payment: PaymentSettings;
   cronConfigured: boolean;
-  adminEmail: string;
   lastLoginAt: string | null;
   lastLoginUserAgent: string | null;
   carriers: ShippingCarrier[];
@@ -21,8 +20,6 @@ export function AdminSettingsPanel(props: Props) {
   const router = useRouter();
   const [fee, setFee] = useState(props.thaiShippingFeeThb);
   const [payment, setPayment] = useState(props.payment);
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -76,18 +73,6 @@ export function AdminSettingsPanel(props: Props) {
     if (releaseError) throw releaseError;
     setMessage(`ตรวจสอบแล้ว ยกเลิกออเดอร์หมดอายุ ${Number(data ?? 0)} รายการ`);
   }, "ตรวจสอบออเดอร์หมดอายุแล้ว");
-
-  const changePassword = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (password.length < 12) return setError("รหัสผ่านใหม่ต้องมีอย่างน้อย 12 ตัวอักษร");
-    if (password !== passwordConfirm) return setError("รหัสผ่านทั้งสองช่องไม่ตรงกัน");
-    void run("password", async () => {
-      const { error: passwordError } = await createClient().auth.updateUser({ password });
-      if (passwordError) throw passwordError;
-      setPassword("");
-      setPasswordConfirm("");
-    }, "เปลี่ยนรหัสผ่านผู้ดูแลแล้ว");
-  };
 
   const signOutAll = async () => {
     if (!window.confirm("ออกจากระบบ Admin ทุกอุปกรณ์หรือไม่?")) return;
@@ -176,14 +161,6 @@ export function AdminSettingsPanel(props: Props) {
           {props.carriers.map((carrier) => <article key={carrier.id}><div><strong>{carrier.name}</strong><small>{carrier.trackingUrlTemplate || "ไม่ได้ตั้งลิงก์ Tracking"}</small></div><div><button type="button" onClick={() => { setCarrierId(carrier.id); setCarrierName(carrier.name); setCarrierUrl(carrier.trackingUrlTemplate); }} aria-label={`แก้ไข ${carrier.name}`} title="แก้ไข"><Pencil /></button><button type="button" onClick={() => removeCarrier(carrier)} aria-label={`ลบ ${carrier.name}`} title="ลบ"><Trash2 /></button></div></article>)}
           {!props.carriers.length && <p className="admin-empty-state">ยังไม่มีบริษัทขนส่ง</p>}
         </div>
-      </form>
-
-      <form onSubmit={changePassword}>
-        <div className="admin-setting-heading"><KeyRound /><div><h2>รหัสผ่าน Admin</h2><p>{props.adminEmail}</p></div></div>
-        {props.adminEmail.endsWith(".local") && <p className="admin-setting-warning">บัญชีนี้ใช้อีเมลภายใน จึงรับลิงก์ลืมรหัสผ่านไม่ได้ ควรเก็บรหัสผ่านไว้ใน Password Manager</p>}
-        <label>รหัสผ่านใหม่<input required type="password" minLength={12} maxLength={128} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} /></label>
-        <label>ยืนยันรหัสผ่านใหม่<input required type="password" minLength={12} maxLength={128} autoComplete="new-password" value={passwordConfirm} onChange={(event) => setPasswordConfirm(event.target.value)} /></label>
-        <button className="admin-primary-button" disabled={Boolean(busy)}><Save />{busy === "password" ? "กำลังเปลี่ยน..." : "เปลี่ยนรหัสผ่าน"}</button>
       </form>
 
       <div>

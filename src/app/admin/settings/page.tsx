@@ -9,7 +9,6 @@ export default async function AdminSettingsPage() {
     thaiShippingFeeThb={thaiShippingFeeThb}
     payment={settings.payment}
     cronConfigured={settings.cronConfigured}
-    adminEmail={process.env.ADMIN_LOGIN_EMAIL?.trim() ?? ""}
     lastLoginAt={settings.lastLoginAt}
     lastLoginUserAgent={settings.lastLoginUserAgent}
     carriers={carriers}
