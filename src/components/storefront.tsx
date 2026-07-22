@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Bike, Check, ChevronDown, Filter, Gauge, Search, ShoppingBag, SlidersHorizontal, Sparkles, Wrench, X } from "lucide-react";
+import { ArrowUp, Bike, Check, ChevronDown, Filter, Gauge, Search, ShoppingBag, SlidersHorizontal, Sparkles, Wrench, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CustomerShell } from "@/components/customer-shell";
 import { useShop } from "@/components/shop-provider";
@@ -12,9 +12,11 @@ import { type Product, type ProductFitment, type StockStatus } from "@/data/cata
 import type { CustomerUser } from "@/lib/auth/customer";
 
 const copy = {
-  en: { search: "Search parts, brands or models", allParts: "All parts", results: "parts", filters: "Filters", clear: "Clear all", vehicle: "Motorcycle", category: "Part category", brand: "Brand", year: "Vehicle year", stock: "Stock status", add: "Add to cart", soldOut: "Sold out", curated: "Built for modern classics", title: "Parts that fit. Details that matter.", intro: "Performance and custom parts selected for Triumph modern classics.", browse: "Browse collection" },
-  th: { search: "ค้นหาอะไหล่ แบรนด์ หรือรุ่นรถ", allParts: "อะไหล่ทั้งหมด", results: "รายการ", filters: "ตัวกรอง", clear: "ล้างทั้งหมด", vehicle: "รุ่นรถ", category: "หมวดอะไหล่", brand: "แบรนด์", year: "ปีรถ", stock: "สถานะสินค้า", add: "เพิ่มลงตะกร้า", soldOut: "สินค้าหมด", curated: "คัดสรรเพื่อ Modern Classic", title: "อะไหล่ที่ใช่ รายละเอียดที่ลงตัว", intro: "อะไหล่แต่งและอุปกรณ์สมรรถนะสำหรับ Triumph Modern Classic", browse: "เลือกดูสินค้า" },
+  en: { search: "Search parts, brands or models", allParts: "All parts", results: "parts", showing: "Showing", of: "of", loadMore: "Load more", backToTop: "Back to top", filters: "Filters", clear: "Clear all", all: "All", vehicle: "Motorcycle", category: "Part category", brand: "Brand", year: "Vehicle year", stock: "Stock status", add: "Add to cart", added: "Added", soldOut: "Sold out", emptyTitle: "No parts found", emptyText: "Try another model, year, category, or brand.", curated: "Built for modern classics", title: "Parts that fit. Details that matter.", intro: "Performance and custom parts selected for Triumph modern classics.", browse: "Browse collection" },
+  th: { search: "ค้นหาอะไหล่ แบรนด์ หรือรุ่นรถ", allParts: "อะไหล่ทั้งหมด", results: "รายการ", showing: "แสดง", of: "จาก", loadMore: "โหลดสินค้าเพิ่ม", backToTop: "กลับขึ้นด้านบน", filters: "ตัวกรอง", clear: "ล้างทั้งหมด", all: "ทั้งหมด", vehicle: "รุ่นรถ", category: "หมวดอะไหล่", brand: "แบรนด์", year: "ปีรถ", stock: "สถานะสินค้า", add: "เพิ่มลงตะกร้า", added: "เพิ่มแล้ว", soldOut: "สินค้าหมด", emptyTitle: "ไม่พบสินค้า", emptyText: "ลองเปลี่ยนรุ่นรถ ปีรถ หมวดหมู่ หรือแบรนด์", curated: "คัดสรรเพื่อ Modern Classic", title: "อะไหล่ที่ใช่ รายละเอียดที่ลงตัว", intro: "อะไหล่แต่งและอุปกรณ์สมรรถนะสำหรับ Triumph Modern Classic", browse: "เลือกดูสินค้า" },
 };
+
+const PAGE_SIZE = 12;
 
 const stockCopy: Record<StockStatus, { en: string; th: string }> = {
   in_stock: { en: "In stock", th: "มีสินค้า" },
@@ -39,6 +41,8 @@ export function Storefront({ user, showHero = true }: { user: CustomerUser | nul
   const [stock, setStock] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [addedProductId, setAddedProductId] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const addedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const t = copy[preferences.locale];
   const country = getCountry(preferences.countryCode);
@@ -70,8 +74,9 @@ export function Storefront({ user, showHero = true }: { user: CustomerUser | nul
       return matchesSearch && matchesFitment && (!category || product.category === category) && (!brand || product.brand === brand) && (!stock || product.stockStatus === stock);
     });
   }, [brand, category, model, products, query, stock, year]);
+  const visibleProducts = filteredProducts.slice(0, visibleCount);
 
-  const resetFilters = () => { setQuery(""); setModel(""); setCategory(""); setBrand(""); setYear(""); setStock(""); };
+  const resetFilters = () => { setQuery(""); setModel(""); setCategory(""); setBrand(""); setYear(""); setStock(""); setVisibleCount(PAGE_SIZE); };
   const addProduct = async (productId: string) => {
     await addToCart(productId);
     setAddedProductId(productId);
@@ -83,45 +88,52 @@ export function Storefront({ user, showHero = true }: { user: CustomerUser | nul
     if (addedTimer.current) clearTimeout(addedTimer.current);
   }, []);
 
+  useEffect(() => {
+    const updateBackToTop = () => setShowBackToTop(window.scrollY > 700);
+    window.addEventListener("scroll", updateBackToTop, { passive: true });
+    return () => window.removeEventListener("scroll", updateBackToTop);
+  }, []);
+
   return (
     <CustomerShell user={user}>
       <main id="top">
         {showHero && <section className="intro-band">
           <div className="intro-copy"><span className="eyebrow"><Bike aria-hidden="true" />{t.curated}</span><h1>{t.title}</h1><p>{t.intro}</p><a className="primary-link" href="#catalog">{t.browse}<ChevronDown aria-hidden="true" /></a></div>
-          <div className="model-panel" id="models">{featuredModels.map((item, index) => <button key={item} onClick={() => { setModel(item); document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" }); }}><span>{String(index + 1).padStart(2, "0")}</span>{item}<ChevronDown aria-hidden="true" /></button>)}</div>
+          <div className="model-panel" id="models">{featuredModels.map((item, index) => <button key={item} onClick={() => { setModel(item); setVisibleCount(PAGE_SIZE); document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" }); }}><span>{String(index + 1).padStart(2, "0")}</span>{item}<ChevronDown aria-hidden="true" /></button>)}</div>
         </section>}
 
         <section className={`catalog ${showHero ? "" : "catalog-page"}`} id="catalog">
-          <div className="catalog-heading"><div><span className="section-kicker">PUCYCLES COLLECTION</span><h2>{t.allParts}</h2></div><div className="search-box"><Search aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.search} aria-label={t.search} />{query && <button onClick={() => setQuery("")} aria-label="Clear search"><X /></button>}</div><button className="filter-trigger" onClick={() => setFiltersOpen(!filtersOpen)} aria-expanded={filtersOpen}><Filter aria-hidden="true" />{t.filters}</button></div>
-          {browseOptions.length > 0 && <div className="catalog-browse"><strong>{browse === "models" ? (preferences.locale === "th" ? "เลือกตามรุ่นรถ" : "Browse by motorcycle") : (preferences.locale === "th" ? "เลือกตามแบรนด์" : "Browse by brand")}</strong><div>{browseOptions.map((option) => <button key={option} className={(browse === "models" ? model : brand) === option ? "active" : ""} onClick={() => browse === "models" ? setModel(option) : setBrand(option)}>{option}</button>)}</div></div>}
+          <div className="catalog-heading"><div><span className="section-kicker">PUCYCLES COLLECTION</span><h2>{t.allParts}</h2></div><div className="search-box"><Search aria-hidden="true" /><input value={query} onChange={(event) => { setQuery(event.target.value); setVisibleCount(PAGE_SIZE); }} placeholder={t.search} aria-label={t.search} />{query && <button onClick={() => { setQuery(""); setVisibleCount(PAGE_SIZE); }} aria-label={t.clear}><X /></button>}</div><button className="filter-trigger" onClick={() => setFiltersOpen(!filtersOpen)} aria-expanded={filtersOpen}><Filter aria-hidden="true" />{t.filters}</button></div>
+          {browseOptions.length > 0 && <div className="catalog-browse"><strong>{browse === "models" ? (preferences.locale === "th" ? "เลือกตามรุ่นรถ" : "Browse by motorcycle") : (preferences.locale === "th" ? "เลือกตามแบรนด์" : "Browse by brand")}</strong><div>{browseOptions.map((option) => <button key={option} className={(browse === "models" ? model : brand) === option ? "active" : ""} onClick={() => { if (browse === "models") setModel(option); else setBrand(option); setVisibleCount(PAGE_SIZE); }}>{option}</button>)}</div></div>}
           <div className="catalog-layout">
             <aside className={filtersOpen ? "filters open" : "filters"}>
               <div className="filter-title"><span><SlidersHorizontal />{t.filters}</span><button onClick={resetFilters}>{t.clear}</button></div>
-              <FilterSelect label={t.vehicle} value={model} options={modelOptions} onChange={setModel} />
-              <FilterSelect label={t.year} value={year} options={yearOptions} onChange={setYear} />
-              <FilterSelect label={t.category} value={category} options={categoryOptions} onChange={setCategory} />
-              <FilterSelect label={t.brand} value={brand} options={brandOptions} onChange={setBrand} />
-              <FilterSelect label={t.stock} value={stock} options={Object.keys(stockCopy)} optionLabel={(value) => stockCopy[value as StockStatus][preferences.locale]} onChange={setStock} />
+              <FilterSelect allLabel={t.all} label={t.vehicle} value={model} options={modelOptions} onChange={(value) => { setModel(value); setVisibleCount(PAGE_SIZE); }} />
+              <FilterSelect allLabel={t.all} label={t.year} value={year} options={yearOptions} onChange={(value) => { setYear(value); setVisibleCount(PAGE_SIZE); }} />
+              <FilterSelect allLabel={t.all} label={t.category} value={category} options={categoryOptions} onChange={(value) => { setCategory(value); setVisibleCount(PAGE_SIZE); }} />
+              <FilterSelect allLabel={t.all} label={t.brand} value={brand} options={brandOptions} onChange={(value) => { setBrand(value); setVisibleCount(PAGE_SIZE); }} />
+              <FilterSelect allLabel={t.all} label={t.stock} value={stock} options={Object.keys(stockCopy)} optionLabel={(value) => stockCopy[value as StockStatus][preferences.locale]} onChange={(value) => { setStock(value); setVisibleCount(PAGE_SIZE); }} />
             </aside>
             <div className="product-region">
-              <div className="result-row"><span>{filteredProducts.length} {t.results}</span><span>{country.name} · {country.currency}</span></div>
-              {filteredProducts.length ? <div className="product-grid">{filteredProducts.map((product) => {
+              <div className="result-row"><span>{t.showing} {Math.min(visibleCount, filteredProducts.length)} {t.of} {filteredProducts.length} {t.results}</span><span>{preferences.locale === "th" ? country.nameTh : country.name} · {country.currency}</span></div>
+              {filteredProducts.length ? <><div className="product-grid">{visibleProducts.map((product) => {
                 const canBuy = product.stockStatus === "in_stock" || product.stockStatus === "low_stock";
                 const added = addedProductId === product.id;
                 return <article className={`product-card ${added ? "product-card-added" : ""}`} key={product.id}>
                   <Link href={`/products/${product.slug}`} className="product-card-link"><ProductVisual product={product} /></Link>
-                  <div className="product-info"><div className={`stock-status ${product.stockStatus}`}><span />{stockCopy[product.stockStatus][preferences.locale]}</div><p className="product-brand">{product.brand}</p><h3><Link href={`/products/${product.slug}`}>{preferences.locale === "th" ? product.nameTh : product.name}</Link></h3><p className="fitment">{(product.fitments?.length ? product.fitments.map((fitment) => `${fitment.model} ${fitment.yearFrom}-${fitment.yearTo}`) : [`${product.models.join(" · ")} ${product.yearFrom}-${product.yearTo}`]).join(" · ")}</p><div className="product-footer"><strong>{formatMoney(product.priceThb, preferences.countryCode, preferences.locale, exchangeRates[country.currency])}</strong><button className={added ? "added" : ""} disabled={!canBuy} onClick={() => void addProduct(product.id)} aria-label={`${t.add}: ${product.name}`}>{canBuy ? added ? <><Check aria-hidden="true" />Added</> : <><ShoppingBag aria-hidden="true" />{t.add}</> : t.soldOut}</button></div></div>
+                  <div className="product-info"><div className={`stock-status ${product.stockStatus}`}><span />{stockCopy[product.stockStatus][preferences.locale]}</div><p className="product-brand">{product.brand}</p><h3><Link href={`/products/${product.slug}`}>{preferences.locale === "th" ? product.nameTh : product.name}</Link></h3><p className="fitment">{(product.fitments?.length ? product.fitments.map((fitment) => `${fitment.model} ${fitment.yearFrom}-${fitment.yearTo}`) : [`${product.models.join(" · ")} ${product.yearFrom}-${product.yearTo}`]).join(" · ")}</p><div className="product-footer"><strong>{formatMoney(product.priceThb, preferences.countryCode, preferences.locale, exchangeRates[country.currency])}</strong><button className={added ? "added" : ""} disabled={!canBuy} onClick={() => void addProduct(product.id)} aria-label={`${t.add}: ${product.name}`}>{canBuy ? added ? <><Check aria-hidden="true" />{t.added}</> : <><ShoppingBag aria-hidden="true" />{t.add}</> : t.soldOut}</button></div></div>
                 </article>;
-              })}</div> : <div className="empty-state"><Search /><h3>No parts found</h3><p>Try another model, year, category, or brand.</p><button onClick={resetFilters}>{t.clear}</button></div>}
+              })}</div>{visibleCount < filteredProducts.length && <button className="catalog-load-more" onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}>{t.loadMore}<ChevronDown aria-hidden="true" /></button>}</> : <div className="empty-state"><Search /><h3>{t.emptyTitle}</h3><p>{t.emptyText}</p><button onClick={resetFilters}>{t.clear}</button></div>}
             </div>
           </div>
         </section>
-        {addedProductId && <div className="cart-toast" role="status"><Check aria-hidden="true" />Added to cart</div>}
+        {showBackToTop && <button className="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} aria-label={t.backToTop} title={t.backToTop}><ArrowUp aria-hidden="true" /></button>}
+        {addedProductId && <div className="cart-toast" role="status"><Check aria-hidden="true" />{t.added}</div>}
       </main>
     </CustomerShell>
   );
 }
 
-function FilterSelect({ label, value, options, onChange, optionLabel = (option) => option }: { label: string; value: string; options: string[]; onChange: (value: string) => void; optionLabel?: (value: string) => string }) {
-  return <label className="filter-field"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}><option value="">All</option>{options.map((option) => <option key={option} value={option}>{optionLabel(option)}</option>)}</select></label>;
+function FilterSelect({ allLabel, label, value, options, onChange, optionLabel = (option) => option }: { allLabel: string; label: string; value: string; options: string[]; onChange: (value: string) => void; optionLabel?: (value: string) => string }) {
+  return <label className="filter-field"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}><option value="">{allLabel}</option>{options.map((option) => <option key={option} value={option}>{optionLabel(option)}</option>)}</select></label>;
 }

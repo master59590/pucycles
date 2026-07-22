@@ -117,6 +117,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .empty-state h3 { margin: 14px 0 0; color: var(--ink); }
 .empty-state p { margin: 7px 0 18px; }
 .empty-state button { border: 0; background: var(--red); color: white; padding: 10px 16px; border-radius: 4px; }
+.catalog-load-more { min-height: 46px; margin: 28px auto 0; padding: 0 20px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--ink); border-radius: 4px; background: white; color: var(--ink); font-size: 12px; font-weight: 900; }
+.catalog-load-more:hover { background: var(--ink); color: white; }
+.catalog-load-more svg { width: 16px; }
+.back-to-top { width: 44px; height: 44px; position: fixed; right: 22px; bottom: 78px; z-index: 58; display: grid; place-items: center; border: 1px solid #3a3a3a; border-radius: 50%; background: var(--ink); color: white; box-shadow: 0 8px 22px rgba(0,0,0,.22); }
+.back-to-top:hover { border-color: var(--red); background: var(--red); }
+.back-to-top svg { width: 18px; }
 .cart-toast { min-width: 150px; min-height: 44px; padding: 0 16px; display: flex; align-items: center; justify-content: center; gap: 8px; position: fixed; right: 22px; bottom: 22px; z-index: 60; border-radius: 4px; background: var(--ink); color: white; box-shadow: 0 12px 30px rgba(0,0,0,.2); font-size: 12px; font-weight: 800; animation: toast-in .22s ease-out; }
 .cart-toast svg { width: 17px; color: #86d394; }
 @keyframes product-added { 0% { transform: scale(1); } 45% { transform: scale(.985); } 100% { transform: scale(1); } }
