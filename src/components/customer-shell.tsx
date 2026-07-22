@@ -13,17 +13,17 @@ export function CustomerShell({ children, user }: { children: React.ReactNode; u
   const { preferences, setPreferences, cartCount } = useShop();
   const country = getCountry(preferences.countryCode);
   const labels = preferences.locale === "th"
-    ? { shop: "สินค้า", models: "รุ่นรถ", brands: "แบรนด์", orders: "คำสั่งซื้อ", contact: "ช่องทางติดต่อ", market: "ประเทศและสกุลเงิน" }
-    : { shop: "Shop", models: "Motorcycles", brands: "Brands", orders: "My orders", contact: "Contact", market: "Country and currency" };
+    ? { shop: "สินค้า", models: "รุ่นรถ", brands: "แบรนด์", orders: "คำสั่งซื้อ", contact: "ช่องทางติดต่อ", market: "ประเทศและสกุลเงิน", utility: "จัดส่งอะไหล่ทั่วโลก · ยืนยันค่าจัดส่งก่อนชำระเงิน", country: "ประเทศ", signIn: "เข้าสู่ระบบด้วย Google", signOut: "ออกจากระบบ", cart: "ตะกร้า", openMenu: "เปิดเมนู", closeMenu: "ปิดเมนู" }
+    : { shop: "Shop", models: "Motorcycles", brands: "Brands", orders: "My orders", contact: "Contact", market: "Country and currency", utility: "Worldwide parts shop · Shipping quote confirmed before payment", country: "Country", signIn: "Sign in with Google", signOut: "Sign out", cart: "Cart", openMenu: "Open menu", closeMenu: "Close menu" };
 
   return (
     <div className="site-shell">
       <div className="utility-bar">
-        <span>Worldwide parts shop · Shipping quote confirmed before payment</span>
+        <span>{labels.utility}</span>
         <div className="locale-controls">
-          <label className="sr-only" htmlFor="site-country">Country</label>
+          <label className="sr-only" htmlFor="site-country">{labels.country}</label>
           <select id="site-country" value={preferences.countryCode} onChange={(event) => setPreferences({ ...preferences, countryCode: event.target.value as typeof preferences.countryCode })}>
-            {countries.map((item) => <option key={item.code} value={item.code}>{item.name} · {item.currency}</option>)}
+            {countries.map((item) => <option key={item.code} value={item.code}>{preferences.locale === "th" ? item.nameTh : item.name} · {item.currency}</option>)}
           </select>
           <div className="language-switch" aria-label="Language">
             <button className={preferences.locale === "en" ? "active" : ""} onClick={() => setPreferences({ ...preferences, locale: "en" })}>EN</button>
@@ -48,11 +48,11 @@ export function CustomerShell({ children, user }: { children: React.ReactNode; u
           {user ? (
             <div className="signed-in-user">
               <span title={user.email}>{user.name}</span>
-              <form action="/auth/signout" method="post"><button className="icon-button account-button" aria-label="Sign out" title={`Sign out ${user.email}`}><LogOut /></button></form>
+              <form action="/auth/signout" method="post"><button className="icon-button account-button" aria-label={labels.signOut} title={`${labels.signOut} ${user.email}`}><LogOut /></button></form>
             </div>
-          ) : <Link className="icon-button account-button" href="/login" aria-label="Sign in with Google" title="Sign in with Google"><CircleUserRound /></Link>}
-          <Link className="cart-button" href="/cart" aria-label={`Cart, ${cartCount} items`}><ShoppingBag aria-hidden="true" /><span>{cartCount}</span></Link>
-          <button className="icon-button mobile-menu" onClick={() => setMenuOpen((open) => !open)} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}>{menuOpen ? <X /> : <Menu />}</button>
+          ) : <Link className="icon-button account-button" href="/login" aria-label={labels.signIn} title={labels.signIn}><CircleUserRound /></Link>}
+          <Link className="cart-button" href="/cart" aria-label={`${labels.cart}, ${cartCount}`}><ShoppingBag aria-hidden="true" /><span>{cartCount}</span></Link>
+          <button className="icon-button mobile-menu" onClick={() => setMenuOpen((open) => !open)} aria-label={menuOpen ? labels.closeMenu : labels.openMenu} aria-expanded={menuOpen}>{menuOpen ? <X /> : <Menu />}</button>
         </div>
       </header>
       {menuOpen && <nav className="mobile-nav" aria-label="Mobile navigation">
@@ -61,7 +61,7 @@ export function CustomerShell({ children, user }: { children: React.ReactNode; u
         <Link href="/products?view=brands" onClick={() => setMenuOpen(false)}>{labels.brands}</Link>
         <Link href="/#contact" onClick={() => setMenuOpen(false)}>{labels.contact}</Link>
         <Link href="/orders" onClick={() => setMenuOpen(false)}>{labels.orders}</Link>
-        {!user && <Link href="/login">Sign in with Google</Link>}
+        {!user && <Link href="/login">{labels.signIn}</Link>}
       </nav>}
 
       {children}
@@ -79,7 +79,7 @@ export function CustomerShell({ children, user }: { children: React.ReactNode; u
           </nav>
           <nav className="footer-policies" aria-label="Shop policies"><span>{preferences.locale === "th" ? "ข้อมูลร้านค้า" : "Shop information"}</span><Link href="/policies#shipping">{preferences.locale === "th" ? "การจัดส่ง" : "Shipping"}</Link><Link href="/policies#returns">{preferences.locale === "th" ? "การคืนสินค้า" : "Returns"}</Link><Link href="/policies#warranty">{preferences.locale === "th" ? "การรับประกัน" : "Warranty"}</Link><Link href="/policies#privacy">{preferences.locale === "th" ? "ความเป็นส่วนตัว" : "Privacy"}</Link><Link href="/policies#terms">{preferences.locale === "th" ? "เงื่อนไขการขาย" : "Terms"}</Link></nav>
         </div>
-        <div className="site-footer-bottom"><span>© PUCYCLES Custom Bike Parts</span><span><small>{labels.market}</small>{country.name} · {country.currency}</span></div>
+        <div className="site-footer-bottom"><span>© PUCYCLES Custom Bike Parts</span><span><small>{labels.market}</small>{preferences.locale === "th" ? country.nameTh : country.name} · {country.currency}</span></div>
       </footer>
     </div>
   );

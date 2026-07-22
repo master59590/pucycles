@@ -220,7 +220,7 @@ export function ShopProvider({ children, catalogProducts, exchangeRates }: { chi
 
         await Promise.all([loadCart(cartId), loadOrders()]);
       } catch (error) {
-        if (active) setShopError(customerErrorMessage(error));
+        if (active) setShopError(customerErrorMessage(error, preferenceState.preferences.locale));
       }
     };
     void hydrate();
@@ -279,7 +279,7 @@ export function ShopProvider({ children, catalogProducts, exchangeRates }: { chi
       const nextQuantity = Math.min((existing?.quantity ?? 0) + quantity, product.stock);
       const previousCart = state.cart;
       setState((current) => ({ ...current, cart: existing ? current.cart.map((line) => line.productId === productId ? { ...line, quantity: nextQuantity } : line) : [...current.cart, { productId, quantity: nextQuantity }] }));
-      try { await persistCartItem(productId, nextQuantity); } catch (error) { setState((current) => ({ ...current, cart: previousCart })); setShopError(customerErrorMessage(error)); }
+      try { await persistCartItem(productId, nextQuantity); } catch (error) { setState((current) => ({ ...current, cart: previousCart })); setShopError(customerErrorMessage(error, state.preferences.locale)); }
     },
     updateCart: async (productId, quantity) => {
       setShopError("");
@@ -287,13 +287,13 @@ export function ShopProvider({ children, catalogProducts, exchangeRates }: { chi
       const nextQuantity = Math.max(0, Math.min(quantity, product?.stock ?? quantity));
       const previousCart = state.cart;
       setState((current) => ({ ...current, cart: nextQuantity <= 0 ? current.cart.filter((line) => line.productId !== productId) : current.cart.map((line) => line.productId === productId ? { ...line, quantity: nextQuantity } : line) }));
-      try { await persistCartItem(productId, nextQuantity); } catch (error) { setState((current) => ({ ...current, cart: previousCart })); setShopError(customerErrorMessage(error)); }
+      try { await persistCartItem(productId, nextQuantity); } catch (error) { setState((current) => ({ ...current, cart: previousCart })); setShopError(customerErrorMessage(error, state.preferences.locale)); }
     },
     removeFromCart: async (productId) => {
       setShopError("");
       const previousCart = state.cart;
       setState((current) => ({ ...current, cart: current.cart.filter((line) => line.productId !== productId) }));
-      try { await persistCartItem(productId, 0); } catch (error) { setState((current) => ({ ...current, cart: previousCart })); setShopError(customerErrorMessage(error)); }
+      try { await persistCartItem(productId, 0); } catch (error) { setState((current) => ({ ...current, cart: previousCart })); setShopError(customerErrorMessage(error, state.preferences.locale)); }
     },
     clearCart: async () => {
       setState((current) => ({ ...current, cart: [] }));
@@ -332,7 +332,7 @@ export function ShopProvider({ children, catalogProducts, exchangeRates }: { chi
       const order = state.orders.find((item) => item.orderNumber === orderNumber);
       if (!order) throw new Error("Order not found.");
       const { error } = await supabase.rpc("accept_customer_shipping_quote", { p_order_id: order.id });
-      if (error) throw new Error(customerErrorMessage(error));
+      if (error) throw error;
       await loadOrders();
     },
     submitPayment: async (orderNumber, file) => {
@@ -342,9 +342,9 @@ export function ShopProvider({ children, catalogProducts, exchangeRates }: { chi
       const path = `${userIdRef.current}/${order.id}/receipt`;
       await supabase.storage.from("payment-proofs").remove([path]);
       const { error: uploadError } = await supabase.storage.from("payment-proofs").upload(path, file, { contentType: file.type, upsert: false });
-      if (uploadError) throw new Error(customerErrorMessage(uploadError));
+      if (uploadError) throw uploadError;
       const { error } = await supabase.rpc("submit_payment_proof", { p_order_id: order.id, p_storage_path: path });
-      if (error) throw new Error(customerErrorMessage(error));
+      if (error) throw error;
       await loadOrders();
     },
     cancelOrder: async (orderNumber) => {
@@ -352,7 +352,7 @@ export function ShopProvider({ children, catalogProducts, exchangeRates }: { chi
       const order = state.orders.find((item) => item.orderNumber === orderNumber);
       if (!order) throw new Error("Order not found.");
       const { error } = await supabase.rpc("cancel_customer_order", { p_order_id: order.id });
-      if (error) throw new Error(customerErrorMessage(error));
+      if (error) throw error;
       await loadOrders();
     },
     updateOrderAddress: async (orderNumber, address) => {
@@ -367,7 +367,7 @@ export function ShopProvider({ children, catalogProducts, exchangeRates }: { chi
         p_shipping_city: address.city,
         p_postal_code: address.postalCode,
       });
-      if (error) throw new Error(customerErrorMessage(error));
+      if (error) throw error;
       await loadOrders();
     },
   }), [catalogProducts, exchangeRates, hydrated, loadOrders, persistCartItem, shopError, state, supabase]);
