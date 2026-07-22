@@ -75,6 +75,7 @@ export function CustomerShell({ children, user }: { children: React.ReactNode; u
             <a href="https://www.instagram.com/pucycles" target="_blank" rel="noopener noreferrer"><Camera aria-hidden="true" /><div><strong>Instagram</strong><small>@pucycles</small></div><ExternalLink aria-hidden="true" /></a>
             <a href="https://www.facebook.com/Pucyclescustom" target="_blank" rel="noopener noreferrer"><MessageCircle aria-hidden="true" /><div><strong>Facebook</strong><small>PUCYCLES Custom</small></div><ExternalLink aria-hidden="true" /></a>
           </nav>
+          <nav className="footer-policies" aria-label="Shop policies"><span>{preferences.locale === "th" ? "ข้อมูลร้านค้า" : "Shop information"}</span><Link href="/policies#shipping">{preferences.locale === "th" ? "การจัดส่ง" : "Shipping"}</Link><Link href="/policies#returns">{preferences.locale === "th" ? "การคืนสินค้า" : "Returns"}</Link><Link href="/policies#warranty">{preferences.locale === "th" ? "การรับประกัน" : "Warranty"}</Link><Link href="/policies#privacy">{preferences.locale === "th" ? "ความเป็นส่วนตัว" : "Privacy"}</Link><Link href="/policies#terms">{preferences.locale === "th" ? "เงื่อนไขการขาย" : "Terms"}</Link></nav>
         </div>
         <div className="site-footer-bottom"><span>© PUCYCLES Custom Bike Parts</span><span><small>{labels.market}</small>{country.name} · {country.currency}</span></div>
       </footer>

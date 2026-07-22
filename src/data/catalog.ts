@@ -1,5 +1,11 @@
 export type StockStatus = "in_stock" | "low_stock" | "out_of_stock";
 
+export type ProductFitment = {
+  model: string;
+  yearFrom: number;
+  yearTo: number;
+};
+
 export type Product = {
   id: string;
   slug: string;
@@ -11,6 +17,7 @@ export type Product = {
   category: string;
   brand: string;
   models: string[];
+  fitments?: ProductFitment[];
   yearFrom: number;
   yearTo: number;
   weightGrams: number;

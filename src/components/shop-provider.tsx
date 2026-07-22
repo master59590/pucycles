@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation";
 import type { Product } from "@/data/catalog";
 import { FirstVisitLanguage } from "@/components/first-visit-language";
 import { createClient } from "@/lib/supabase/client";
-import type { CartLine, CheckoutAddress, CountryCode, CurrencyCode, CustomerOrder, Locale, OrderStatus, PaymentInstructions, ShopPreferences } from "@/types/shop";
+import { customerErrorMessage } from "@/lib/customer-error";
+import type { CartLine, CheckoutAddress, CountryCode, CurrencyCode, CustomerOrder, ExchangeRates, Locale, OrderStatus, PaymentInstructions, ShopPreferences } from "@/types/shop";
 
 type ShopState = {
   preferences: ShopPreferences;
@@ -19,13 +20,15 @@ type ShopContextValue = ShopState & {
   shopError: string;
   cartCount: number;
   products: Product[];
+  exchangeRates: ExchangeRates;
   setPreferences: (preferences: ShopPreferences) => void;
   addToCart: (productId: string, quantity?: number) => Promise<void>;
   updateCart: (productId: string, quantity: number) => Promise<void>;
   removeFromCart: (productId: string) => Promise<void>;
   clearCart: () => Promise<void>;
-  placeOrder: (address: CheckoutAddress) => Promise<string>;
+  placeOrder: (address: CheckoutAddress, termsVersion?: string) => Promise<string>;
   submitPayment: (orderNumber: string, file: File) => Promise<void>;
+  acceptShippingQuote: (orderNumber: string) => Promise<void>;
   cancelOrder: (orderNumber: string) => Promise<void>;
   updateOrderAddress: (orderNumber: string, address: CheckoutAddress) => Promise<void>;
 };
@@ -49,6 +52,8 @@ type DbOrder = {
   payment_instructions?: PaymentInstructions | null;
   shipping_company: string | null;
   tracking_number: string | null;
+  reservation_expires_at?: string;
+  shipping_quote_accepted_at?: string | null;
   order_items: Array<{
     id: string;
     product_id: string | null;
@@ -138,10 +143,12 @@ function mapOrder(order: DbOrder): CustomerOrder {
     paymentRejectionReason: paymentProof?.rejection_reason ?? undefined,
     shippingCompany: order.shipping_company ?? undefined,
     trackingNumber: order.tracking_number ?? undefined,
+    reservationExpiresAt: order.reservation_expires_at,
+    shippingQuoteAcceptedAt: order.shipping_quote_accepted_at,
   };
 }
 
-export function ShopProvider({ children, catalogProducts }: { children: React.ReactNode; catalogProducts: Product[] }) {
+export function ShopProvider({ children, catalogProducts, exchangeRates }: { children: React.ReactNode; catalogProducts: Product[]; exchangeRates: ExchangeRates }) {
   const pathname = usePathname();
   const supabase = useMemo(() => createClient(), []);
   const [state, setState] = useState<ShopState>(initialState);
@@ -153,14 +160,14 @@ export function ShopProvider({ children, catalogProducts }: { children: React.Re
   const loadOrders = useCallback(async () => {
     const currentResult = await supabase
       .from("orders")
-      .select("id, order_number, created_at, status, customer_name, customer_phone, shipping_country, shipping_address, shipping_city, postal_code, currency, exchange_rate_from_thb, subtotal_thb, shipping_fee_thb, payment_method, payment_instructions, shipping_company, tracking_number, order_items(id, product_id, product_name_snapshot, sku_snapshot, quantity, unit_price_thb), payment_proofs(storage_path, status, rejection_reason)")
+      .select("id, order_number, created_at, status, customer_name, customer_phone, shipping_country, shipping_address, shipping_city, postal_code, currency, exchange_rate_from_thb, subtotal_thb, shipping_fee_thb, payment_method, payment_instructions, shipping_company, tracking_number, reservation_expires_at, shipping_quote_accepted_at, order_items(id, product_id, product_name_snapshot, sku_snapshot, quantity, unit_price_thb), payment_proofs(storage_path, status, rejection_reason)")
       .order("created_at", { ascending: false });
     let orderData: unknown = currentResult.data;
     let loadError: { message: string } | null = currentResult.error;
-    if (loadError?.message.includes("rejection_reason") || loadError?.message.includes("payment_instructions")) {
+    if (loadError?.message.includes("rejection_reason") || loadError?.message.includes("payment_instructions") || loadError?.message.includes("shipping_quote_accepted_at")) {
       const legacyResult = await supabase
         .from("orders")
-        .select("id, order_number, created_at, status, customer_name, customer_phone, shipping_country, shipping_address, shipping_city, postal_code, currency, exchange_rate_from_thb, subtotal_thb, shipping_fee_thb, payment_method, shipping_company, tracking_number, order_items(id, product_id, product_name_snapshot, sku_snapshot, quantity, unit_price_thb), payment_proofs(storage_path, status)")
+        .select("id, order_number, created_at, status, customer_name, customer_phone, shipping_country, shipping_address, shipping_city, postal_code, currency, exchange_rate_from_thb, subtotal_thb, shipping_fee_thb, payment_method, shipping_company, tracking_number, reservation_expires_at, order_items(id, product_id, product_name_snapshot, sku_snapshot, quantity, unit_price_thb), payment_proofs(storage_path, status)")
         .order("created_at", { ascending: false });
       orderData = legacyResult.data;
       loadError = legacyResult.error;
@@ -193,6 +200,7 @@ export function ShopProvider({ children, catalogProducts }: { children: React.Re
       const preferenceState = parsePreferences(window.localStorage.getItem(PREFERENCES_KEY));
       const guestCart = parseGuestCart(window.localStorage.getItem(GUEST_CART_KEY));
       setState((current) => ({ ...current, ...preferenceState, cart: guestCart }));
+      if (active) setHydrated(true);
 
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -212,9 +220,7 @@ export function ShopProvider({ children, catalogProducts }: { children: React.Re
 
         await Promise.all([loadCart(cartId), loadOrders()]);
       } catch (error) {
-        if (active) setShopError(error instanceof Error ? error.message : "Could not load your shop data.");
-      } finally {
-        if (active) setHydrated(true);
+        if (active) setShopError(customerErrorMessage(error));
       }
     };
     void hydrate();
@@ -256,6 +262,7 @@ export function ShopProvider({ children, catalogProducts }: { children: React.Re
     hydrated,
     shopError,
     products: catalogProducts,
+    exchangeRates,
     cartCount: state.cart.reduce((sum, line) => sum + line.quantity, 0),
     setPreferences: (preferences) => {
       setState((current) => ({ ...current, preferences, setupComplete: true }));
@@ -270,20 +277,23 @@ export function ShopProvider({ children, catalogProducts }: { children: React.Re
       if (!product || product.stock <= 0) return;
       const existing = state.cart.find((line) => line.productId === productId);
       const nextQuantity = Math.min((existing?.quantity ?? 0) + quantity, product.stock);
+      const previousCart = state.cart;
       setState((current) => ({ ...current, cart: existing ? current.cart.map((line) => line.productId === productId ? { ...line, quantity: nextQuantity } : line) : [...current.cart, { productId, quantity: nextQuantity }] }));
-      try { await persistCartItem(productId, nextQuantity); } catch (error) { setShopError(error instanceof Error ? error.message : "Could not update cart."); }
+      try { await persistCartItem(productId, nextQuantity); } catch (error) { setState((current) => ({ ...current, cart: previousCart })); setShopError(customerErrorMessage(error)); }
     },
     updateCart: async (productId, quantity) => {
       setShopError("");
       const product = catalogProducts.find((item) => item.id === productId);
       const nextQuantity = Math.max(0, Math.min(quantity, product?.stock ?? quantity));
+      const previousCart = state.cart;
       setState((current) => ({ ...current, cart: nextQuantity <= 0 ? current.cart.filter((line) => line.productId !== productId) : current.cart.map((line) => line.productId === productId ? { ...line, quantity: nextQuantity } : line) }));
-      try { await persistCartItem(productId, nextQuantity); } catch (error) { setShopError(error instanceof Error ? error.message : "Could not update cart."); }
+      try { await persistCartItem(productId, nextQuantity); } catch (error) { setState((current) => ({ ...current, cart: previousCart })); setShopError(customerErrorMessage(error)); }
     },
     removeFromCart: async (productId) => {
       setShopError("");
+      const previousCart = state.cart;
       setState((current) => ({ ...current, cart: current.cart.filter((line) => line.productId !== productId) }));
-      try { await persistCartItem(productId, 0); } catch (error) { setShopError(error instanceof Error ? error.message : "Could not remove item."); }
+      try { await persistCartItem(productId, 0); } catch (error) { setState((current) => ({ ...current, cart: previousCart })); setShopError(customerErrorMessage(error)); }
     },
     clearCart: async () => {
       setState((current) => ({ ...current, cart: [] }));
@@ -292,7 +302,7 @@ export function ShopProvider({ children, catalogProducts }: { children: React.Re
         if (error) throw error;
       }
     },
-    placeOrder: async (address) => {
+    placeOrder: async (address, termsVersion = "2026-07-22") => {
       setShopError("");
       if (!userIdRef.current) throw new Error("Please sign in before checkout.");
       if (!state.cart.length) throw new Error("Your cart is empty.");
@@ -308,6 +318,7 @@ export function ShopProvider({ children, catalogProducts }: { children: React.Re
       if (error) throw error;
       const created = (data as Array<{ order_id: string; order_number: string }> | null)?.[0];
       if (!created) throw new Error("Order was not created.");
+      await supabase.rpc("record_customer_terms_acceptance", { p_order_id: created.order_id, p_terms_version: termsVersion });
       setState((current) => ({ ...current, cart: [] }));
       if (cartIdRef.current) {
         const { error: clearError } = await supabase.from("cart_items").delete().eq("cart_id", cartIdRef.current);
@@ -316,6 +327,14 @@ export function ShopProvider({ children, catalogProducts }: { children: React.Re
       await loadOrders();
       return created.order_number;
     },
+    acceptShippingQuote: async (orderNumber) => {
+      setShopError("");
+      const order = state.orders.find((item) => item.orderNumber === orderNumber);
+      if (!order) throw new Error("Order not found.");
+      const { error } = await supabase.rpc("accept_customer_shipping_quote", { p_order_id: order.id });
+      if (error) throw new Error(customerErrorMessage(error));
+      await loadOrders();
+    },
     submitPayment: async (orderNumber, file) => {
       setShopError("");
       const order = state.orders.find((item) => item.orderNumber === orderNumber);
@@ -323,9 +342,9 @@ export function ShopProvider({ children, catalogProducts }: { children: React.Re
       const path = `${userIdRef.current}/${order.id}/receipt`;
       await supabase.storage.from("payment-proofs").remove([path]);
       const { error: uploadError } = await supabase.storage.from("payment-proofs").upload(path, file, { contentType: file.type, upsert: false });
-      if (uploadError) throw uploadError;
+      if (uploadError) throw new Error(customerErrorMessage(uploadError));
       const { error } = await supabase.rpc("submit_payment_proof", { p_order_id: order.id, p_storage_path: path });
-      if (error) throw error;
+      if (error) throw new Error(customerErrorMessage(error));
       await loadOrders();
     },
     cancelOrder: async (orderNumber) => {
@@ -333,7 +352,7 @@ export function ShopProvider({ children, catalogProducts }: { children: React.Re
       const order = state.orders.find((item) => item.orderNumber === orderNumber);
       if (!order) throw new Error("Order not found.");
       const { error } = await supabase.rpc("cancel_customer_order", { p_order_id: order.id });
-      if (error) throw error;
+      if (error) throw new Error(customerErrorMessage(error));
       await loadOrders();
     },
     updateOrderAddress: async (orderNumber, address) => {
@@ -348,14 +367,14 @@ export function ShopProvider({ children, catalogProducts }: { children: React.Re
         p_shipping_city: address.city,
         p_postal_code: address.postalCode,
       });
-      if (error) throw error;
+      if (error) throw new Error(customerErrorMessage(error));
       await loadOrders();
     },
-  }), [catalogProducts, hydrated, loadOrders, persistCartItem, shopError, state, supabase]);
+  }), [catalogProducts, exchangeRates, hydrated, loadOrders, persistCartItem, shopError, state, supabase]);
 
   return <ShopContext.Provider value={value}>
     {children}
-    {showLanguageGate && <FirstVisitLanguage ready={hydrated} onSelect={(locale) => value.setPreferences({ ...state.preferences, locale })} />}
+    {showLanguageGate && <FirstVisitLanguage ready={hydrated} onSelect={(locale, countryCode) => value.setPreferences({ locale, countryCode })} />}
   </ShopContext.Provider>;
 }
 

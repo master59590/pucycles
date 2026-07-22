@@ -1,6 +1,7 @@
 export type Locale = "en" | "th";
 export type CountryCode = "TH" | "AT" | "AU" | "PH" | "AE" | "IN";
 export type CurrencyCode = "THB" | "EUR" | "AUD" | "PHP" | "AED" | "INR";
+export type ExchangeRates = Record<CurrencyCode, number>;
 
 export type ShopPreferences = {
   locale: Locale;
@@ -70,4 +71,6 @@ export type CustomerOrder = {
   paymentRejectionReason?: string;
   shippingCompany?: string;
   trackingNumber?: string;
+  reservationExpiresAt?: string;
+  shippingQuoteAcceptedAt?: string | null;
 };

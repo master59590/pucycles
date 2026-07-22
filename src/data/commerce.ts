@@ -1,4 +1,4 @@
-import type { CountryCode, CurrencyCode, OrderStatus } from "@/types/shop";
+import type { CountryCode, CurrencyCode, ExchangeRates, OrderStatus } from "@/types/shop";
 
 export const countries: Array<{
   code: CountryCode;
@@ -13,6 +13,15 @@ export const countries: Array<{
   { code: "AE", name: "UAE / Dubai", currency: "AED", rate: 0.108 },
   { code: "IN", name: "India", currency: "INR", rate: 2.47 },
 ];
+
+export const defaultExchangeRates: ExchangeRates = {
+  THB: 1,
+  EUR: 0.026,
+  AUD: 0.043,
+  PHP: 1.66,
+  AED: 0.108,
+  INR: 2.47,
+};
 
 export const orderStatusCopy: Record<OrderStatus, { en: string; th: string }> = {
   shipping_quote: { en: "Waiting shipping quote", th: "รอตรวจสอบค่าจัดส่ง" },
@@ -30,11 +39,11 @@ export function getCountry(code: CountryCode) {
   return countries.find((country) => country.code === code) ?? countries[0];
 }
 
-export function formatMoney(priceThb: number, countryCode: CountryCode, locale: "en" | "th") {
+export function formatMoney(priceThb: number, countryCode: CountryCode, locale: "en" | "th", rateFromThb?: number) {
   const country = getCountry(countryCode);
   return new Intl.NumberFormat(locale === "th" ? "th-TH" : "en-US", {
     style: "currency",
     currency: country.currency,
     maximumFractionDigits: country.currency === "THB" ? 0 : 2,
-  }).format(priceThb * country.rate);
+  }).format(priceThb * (rateFromThb ?? country.rate));
 }

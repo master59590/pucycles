@@ -53,6 +53,11 @@ export async function getCatalogProducts(): Promise<Product[]> {
       category: row.categories?.name_en ?? "Parts",
       brand: row.brands?.name ?? "PUCYCLES",
       models: [...new Set(fitments.flatMap((fitment) => fitment.vehicle_models?.name ? [fitment.vehicle_models.name] : []))],
+      fitments: fitments.flatMap((fitment) => fitment.vehicle_models?.name ? [{
+        model: fitment.vehicle_models.name,
+        yearFrom: fitment.year_from,
+        yearTo: fitment.year_to,
+      }] : []),
       yearFrom: fitments.length ? Math.min(...fitments.map((fitment) => fitment.year_from)) : new Date().getFullYear(),
       yearTo: fitments.length ? Math.max(...fitments.map((fitment) => fitment.year_to)) : new Date().getFullYear(),
       weightGrams: row.weight_grams,

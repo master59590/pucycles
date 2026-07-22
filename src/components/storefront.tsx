@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Bike, Check, ChevronDown, Filter, Gauge, Search, ShoppingBag, SlidersHorizontal, Sparkles, Wrench, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CustomerShell } from "@/components/customer-shell";
 import { useShop } from "@/components/shop-provider";
 import { formatMoney, getCountry } from "@/data/commerce";
-import { brands, categories, models, type Product, type StockStatus } from "@/data/catalog";
+import { type Product, type ProductFitment, type StockStatus } from "@/data/catalog";
 import type { CustomerUser } from "@/lib/auth/customer";
 
 const copy = {
@@ -28,7 +29,8 @@ export function ProductVisual({ product, imageUrl = product.imageUrls?.[0] }: { 
 }
 
 export function Storefront({ user, showHero = true }: { user: CustomerUser | null; isAdmin?: boolean; showHero?: boolean }) {
-  const { preferences, addToCart, products } = useShop();
+  const { preferences, addToCart, products, exchangeRates } = useShop();
+  const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
   const [model, setModel] = useState("");
   const [category, setCategory] = useState("");
@@ -40,13 +42,27 @@ export function Storefront({ user, showHero = true }: { user: CustomerUser | nul
   const addedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const t = copy[preferences.locale];
   const country = getCountry(preferences.countryCode);
+  const modelOptions = useMemo(() => [...new Set(products.flatMap((product) => product.models))].sort(), [products]);
+  const categoryOptions = useMemo(() => [...new Set(products.map((product) => product.category))].sort(), [products]);
+  const brandOptions = useMemo(() => [...new Set(products.map((product) => product.brand))].sort(), [products]);
+  const yearOptions = useMemo(() => {
+    const fitments = products.flatMap((product) => product.fitments?.length ? product.fitments : [{ model: "", yearFrom: product.yearFrom, yearTo: product.yearTo }]);
+    if (!fitments.length) return [];
+    const first = Math.min(...fitments.map((fitment) => fitment.yearFrom));
+    const last = Math.max(...fitments.map((fitment) => fitment.yearTo));
+    return Array.from({ length: last - first + 1 }, (_, index) => String(last - index));
+  }, [products]);
+  const browse = searchParams.get("view");
+  const browseOptions = browse === "models" ? modelOptions : browse === "brands" ? brandOptions : [];
 
   const filteredProducts = useMemo(() => {
     const search = query.trim().toLowerCase();
     const selectedYear = Number(year);
     return products.filter((product) => {
       const matchesSearch = !search || [product.name, product.nameTh, product.brand, product.category, product.sku, ...product.models].join(" ").toLowerCase().includes(search);
-      return matchesSearch && (!model || product.models.includes(model)) && (!category || product.category === category) && (!brand || product.brand === brand) && (!year || (selectedYear >= product.yearFrom && selectedYear <= product.yearTo)) && (!stock || product.stockStatus === stock);
+      const fitments: ProductFitment[] = product.fitments?.length ? product.fitments : product.models.map((item) => ({ model: item, yearFrom: product.yearFrom, yearTo: product.yearTo }));
+      const matchesFitment = (!model && !year) || fitments.some((fitment) => (!model || fitment.model === model) && (!year || (selectedYear >= fitment.yearFrom && selectedYear <= fitment.yearTo)));
+      return matchesSearch && matchesFitment && (!category || product.category === category) && (!brand || product.brand === brand) && (!stock || product.stockStatus === stock);
     });
   }, [brand, category, model, products, query, stock, year]);
 
@@ -67,18 +83,19 @@ export function Storefront({ user, showHero = true }: { user: CustomerUser | nul
       <main id="top">
         {showHero && <section className="intro-band">
           <div className="intro-copy"><span className="eyebrow"><Bike aria-hidden="true" />{t.curated}</span><h1>{t.title}</h1><p>{t.intro}</p><a className="primary-link" href="#catalog">{t.browse}<ChevronDown aria-hidden="true" /></a></div>
-          <div className="model-panel" id="models">{models.map((item, index) => <button key={item} onClick={() => { setModel(item); document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" }); }}><span>0{index + 1}</span>{item}<ChevronDown aria-hidden="true" /></button>)}</div>
+          <div className="model-panel" id="models">{modelOptions.map((item, index) => <button key={item} onClick={() => { setModel(item); document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" }); }}><span>{String(index + 1).padStart(2, "0")}</span>{item}<ChevronDown aria-hidden="true" /></button>)}</div>
         </section>}
 
         <section className={`catalog ${showHero ? "" : "catalog-page"}`} id="catalog">
           <div className="catalog-heading"><div><span className="section-kicker">PUCYCLES COLLECTION</span><h2>{t.allParts}</h2></div><div className="search-box"><Search aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.search} aria-label={t.search} />{query && <button onClick={() => setQuery("")} aria-label="Clear search"><X /></button>}</div><button className="filter-trigger" onClick={() => setFiltersOpen(!filtersOpen)} aria-expanded={filtersOpen}><Filter aria-hidden="true" />{t.filters}</button></div>
+          {browseOptions.length > 0 && <div className="catalog-browse"><strong>{browse === "models" ? (preferences.locale === "th" ? "เลือกตามรุ่นรถ" : "Browse by motorcycle") : (preferences.locale === "th" ? "เลือกตามแบรนด์" : "Browse by brand")}</strong><div>{browseOptions.map((option) => <button key={option} className={(browse === "models" ? model : brand) === option ? "active" : ""} onClick={() => browse === "models" ? setModel(option) : setBrand(option)}>{option}</button>)}</div></div>}
           <div className="catalog-layout">
             <aside className={filtersOpen ? "filters open" : "filters"}>
               <div className="filter-title"><span><SlidersHorizontal />{t.filters}</span><button onClick={resetFilters}>{t.clear}</button></div>
-              <FilterSelect label={t.vehicle} value={model} options={models} onChange={setModel} />
-              <FilterSelect label={t.year} value={year} options={Array.from({ length: 11 }, (_, index) => String(2016 + index))} onChange={setYear} />
-              <FilterSelect label={t.category} value={category} options={categories} onChange={setCategory} />
-              <FilterSelect label={t.brand} value={brand} options={[...brands, "PUCYCLES"]} onChange={setBrand} />
+              <FilterSelect label={t.vehicle} value={model} options={modelOptions} onChange={setModel} />
+              <FilterSelect label={t.year} value={year} options={yearOptions} onChange={setYear} />
+              <FilterSelect label={t.category} value={category} options={categoryOptions} onChange={setCategory} />
+              <FilterSelect label={t.brand} value={brand} options={brandOptions} onChange={setBrand} />
               <FilterSelect label={t.stock} value={stock} options={Object.keys(stockCopy)} optionLabel={(value) => stockCopy[value as StockStatus][preferences.locale]} onChange={setStock} />
             </aside>
             <div className="product-region">
@@ -88,7 +105,7 @@ export function Storefront({ user, showHero = true }: { user: CustomerUser | nul
                 const added = addedProductId === product.id;
                 return <article className={`product-card ${added ? "product-card-added" : ""}`} key={product.id}>
                   <Link href={`/products/${product.slug}`} className="product-card-link"><ProductVisual product={product} /></Link>
-                  <div className="product-info"><div className={`stock-status ${product.stockStatus}`}><span />{stockCopy[product.stockStatus][preferences.locale]}</div><p className="product-brand">{product.brand}</p><h3><Link href={`/products/${product.slug}`}>{preferences.locale === "th" ? product.nameTh : product.name}</Link></h3><p className="fitment">{product.models.join(" · ")} · {product.yearFrom}-{product.yearTo}</p><div className="product-footer"><strong>{formatMoney(product.priceThb, preferences.countryCode, preferences.locale)}</strong><button className={added ? "added" : ""} disabled={!canBuy} onClick={() => void addProduct(product.id)} aria-label={`${t.add}: ${product.name}`}>{canBuy ? added ? <><Check aria-hidden="true" />Added</> : <><ShoppingBag aria-hidden="true" />{t.add}</> : t.soldOut}</button></div></div>
+                  <div className="product-info"><div className={`stock-status ${product.stockStatus}`}><span />{stockCopy[product.stockStatus][preferences.locale]}</div><p className="product-brand">{product.brand}</p><h3><Link href={`/products/${product.slug}`}>{preferences.locale === "th" ? product.nameTh : product.name}</Link></h3><p className="fitment">{(product.fitments?.length ? product.fitments.map((fitment) => `${fitment.model} ${fitment.yearFrom}-${fitment.yearTo}`) : [`${product.models.join(" · ")} ${product.yearFrom}-${product.yearTo}`]).join(" · ")}</p><div className="product-footer"><strong>{formatMoney(product.priceThb, preferences.countryCode, preferences.locale, exchangeRates[country.currency])}</strong><button className={added ? "added" : ""} disabled={!canBuy} onClick={() => void addProduct(product.id)} aria-label={`${t.add}: ${product.name}`}>{canBuy ? added ? <><Check aria-hidden="true" />Added</> : <><ShoppingBag aria-hidden="true" />{t.add}</> : t.soldOut}</button></div></div>
                 </article>;
               })}</div> : <div className="empty-state"><Search /><h3>No parts found</h3><p>Try another model, year, category, or brand.</p><button onClick={resetFilters}>{t.clear}</button></div>}
             </div>

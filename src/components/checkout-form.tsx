@@ -1,20 +1,24 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight, Check, LockKeyhole, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { CustomerShell } from "@/components/customer-shell";
 import { useShop } from "@/components/shop-provider";
 import { countries, formatMoney, getCountry } from "@/data/commerce";
+import { POLICY_VERSION } from "@/data/policies";
+import { customerErrorMessage } from "@/lib/customer-error";
 import type { CustomerUser } from "@/lib/auth/customer";
 import type { CheckoutAddress, CountryCode } from "@/types/shop";
 
 export function CheckoutForm({ user, isAdmin, savedAddress, thaiShippingFeeThb }: { user: CustomerUser; isAdmin: boolean; savedAddress: CheckoutAddress | null; thaiShippingFeeThb: number }) {
   const router = useRouter();
-  const { cart, preferences, placeOrder, setPreferences, products } = useShop();
+  const { cart, preferences, placeOrder, setPreferences, products, exchangeRates } = useShop();
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [address, setAddress] = useState<CheckoutAddress>(savedAddress ?? {
     name: user.name,
     phone: "",
@@ -42,10 +46,11 @@ export function CheckoutForm({ user, isAdmin, savedAddress, thaiShippingFeeThb }
     setSubmitError("");
     try {
       setPreferences({ ...preferences, countryCode: address.countryCode });
-      const orderNumber = await placeOrder(address);
+      const orderNumber = await placeOrder(address, POLICY_VERSION);
       router.push(`/orders/${orderNumber}${thai ? "?payment=1#payment" : ""}`);
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : "Could not create order. Please try again.");
+      setSubmitError(customerErrorMessage(error));
+      router.refresh();
       setSubmitting(false);
     }
   };
@@ -66,17 +71,21 @@ export function CheckoutForm({ user, isAdmin, savedAddress, thaiShippingFeeThb }
             <label><span>Postal code</span><input required maxLength={20} value={address.postalCode} onChange={(event) => setAddress({ ...address, postalCode: event.target.value })} /></label>
           </div>
           <div className="checkout-flow-note"><LockKeyhole /><div><strong>{thai ? "Thai bank transfer" : "International shipping quote"}</strong><p>{thai ? "Your order will be reserved and bank transfer instructions shown next." : "Your order will be reserved. The store will confirm Thailand Post shipping before you pay by Western Union."}</p></div></div>
+          <label className="checkout-terms">
+            <input required type="checkbox" checked={acceptedTerms} onChange={(event) => setAcceptedTerms(event.target.checked)} />
+            <span>{preferences.locale === "th" ? <>ฉันตรวจสอบรุ่นรถที่รองรับแล้ว และยอมรับ <Link href="/policies" target="_blank">นโยบายการจัดส่ง การคืนสินค้า ความเป็นส่วนตัว และเงื่อนไขการขาย</Link></> : <>I have checked the motorcycle fitment and agree to the <Link href="/policies" target="_blank">shipping, return, privacy, and sale policies</Link>.</>}</span>
+          </label>
           {submitError && <p className="field-error" role="alert">{submitError}</p>}
-          <button className="shop-primary-button" disabled={submitting}>{submitting ? "Creating order..." : <>Place order <ArrowRight /></>}</button>
+          <button className="shop-primary-button" disabled={submitting || !acceptedTerms}>{submitting ? "Creating order..." : <>Place order <ArrowRight /></>}</button>
         </form>
 
         <aside className="order-summary">
           <h2>Order summary</h2>
-          <div className="checkout-items">{lines.map(({ product, quantity }) => <article key={product.id}><div className="checkout-item-thumb">{product.imageUrls?.[0] ? <Image src={product.imageUrls[0]} alt={product.name} fill sizes="46px" /> : null}</div><div><strong>{preferences.locale === "th" ? product.nameTh : product.name}</strong><span>{quantity} × {formatMoney(product.priceThb, address.countryCode, preferences.locale)}</span></div></article>)}</div>
-          <div><span>{cart.reduce((sum, line) => sum + line.quantity, 0)} items</span><strong>{formatMoney(subtotal, address.countryCode, preferences.locale)}</strong></div>
-          <div><span>Shipping</span><strong>{shipping === null ? "Pending quote" : formatMoney(shipping, address.countryCode, preferences.locale)}</strong></div>
-          <div className="summary-total"><span>Total</span><strong>{shipping === null ? "Confirmed later" : formatMoney(subtotal + shipping, address.countryCode, preferences.locale)}</strong></div>
-          <p>Currency: {country.currency}. The exchange rate is saved with the order.</p>
+          <div className="checkout-items">{lines.map(({ product, quantity }) => <article key={product.id}><div className="checkout-item-thumb">{product.imageUrls?.[0] ? <Image src={product.imageUrls[0]} alt={product.name} fill sizes="46px" /> : null}</div><div><strong>{preferences.locale === "th" ? product.nameTh : product.name}</strong><span>{quantity} × {formatMoney(product.priceThb, address.countryCode, preferences.locale, exchangeRates[country.currency])}</span></div></article>)}</div>
+          <div><span>{cart.reduce((sum, line) => sum + line.quantity, 0)} items</span><strong>{formatMoney(subtotal, address.countryCode, preferences.locale, exchangeRates[country.currency])}</strong></div>
+          <div><span>Shipping</span><strong>{shipping === null ? "Pending quote" : formatMoney(shipping, address.countryCode, preferences.locale, exchangeRates[country.currency])}</strong></div>
+          <div className="summary-total"><span>Total</span><strong>{shipping === null ? "Confirmed later" : formatMoney(subtotal + shipping, address.countryCode, preferences.locale, exchangeRates[country.currency])}</strong></div>
+          <p>Currency: {country.currency}. Prices use the latest shop exchange rate and the final rate is saved with the order.</p>
         </aside>
       </div>
     </main>
