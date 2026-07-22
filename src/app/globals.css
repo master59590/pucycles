@@ -344,6 +344,20 @@ footer span:last-child { margin-left: auto; }
 .payment-instructions { margin-bottom: 15px; padding: 14px; background: #f4f4f3; }
 .payment-instructions strong { font-size: 12px; }
 .payment-instructions p { margin: 5px 0 0; color: #666; font-size: 10px; }
+.thai-bank-details { margin-bottom: 15px; border: 1px solid #d9d9d6; border-radius: 5px; overflow: hidden; }
+.thai-bank-details > div { min-height: 62px; padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #151515; color: white; }
+.thai-bank-details > div span { color: #ccc; font-size: 10px; }
+.thai-bank-details > div strong { font-size: 19px; }
+.thai-bank-details dl { margin: 0; padding: 8px 16px; }
+.thai-bank-details dl > div { min-height: 45px; display: grid; grid-template-columns: 86px minmax(0, 1fr); align-items: center; gap: 12px; border-bottom: 1px solid #eee; }
+.thai-bank-details dl > div:last-child { border-bottom: 0; }
+.thai-bank-details dt { color: #777; font-size: 9px; font-weight: 800; }
+.thai-bank-details dd { margin: 0; font-size: 12px; font-weight: 800; }
+.bank-account-number dd { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.bank-account-number dd > strong { font-size: 18px; letter-spacing: 0; }
+.bank-account-number button { width: 34px; height: 34px; flex: 0 0 auto; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 4px; background: white; }
+.bank-account-number button:hover { color: var(--red); border-color: var(--red); }
+.bank-account-number button svg { width: 15px; }
 .proof-upload { min-height: 72px; padding: 12px 15px; display: flex; align-items: center; gap: 12px; border: 1px dashed #aaa; position: relative; cursor: pointer; }
 .proof-upload > svg { width: 20px; color: var(--red); }
 .proof-upload span { font-size: 11px; font-weight: 800; }

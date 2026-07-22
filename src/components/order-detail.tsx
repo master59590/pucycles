@@ -17,6 +17,13 @@ const timeline: Array<{ status: OrderStatus; label: string; icon: typeof Clock3 
   { status: "shipped", label: "Shipped", icon: Truck },
 ];
 
+const thaiBankAccount = {
+  bank: "ธนาคารกสิกรไทย",
+  accountName: "จุฑารัตน์ อินทรณรงค์",
+  accountNumber: "0348696793",
+  formattedAccountNumber: "034-8-69679-3",
+};
+
 export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: string; user: CustomerUser; isAdmin: boolean }) {
   const { orders, preferences, hydrated, submitPayment, cancelOrder, updateOrderAddress, products } = useShop();
   const order = orders.find((item) => item.orderNumber === orderNumber);
@@ -27,6 +34,7 @@ export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: strin
   const [editing, setEditing] = useState(false);
   const [address, setAddress] = useState<CheckoutAddress | null>(order?.address ?? null);
   const [copiedTracking, setCopiedTracking] = useState(false);
+  const [copiedBankAccount, setCopiedBankAccount] = useState(false);
 
   useEffect(() => {
     if (order?.status !== "waiting_payment" || window.location.hash !== "#payment") return;
@@ -43,6 +51,7 @@ export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: strin
 
   const canChange = ["waiting_payment", "shipping_quote"].includes(order.status);
   const totalThb = order.subtotalThb + (order.shippingFeeThb ?? 0);
+  const isThaiBankTransfer = order.address.countryCode === "TH" && order.paymentMethod === "bank_transfer";
   const selectFile = (selected?: File) => {
     setFileError("");
     if (!selected) return setFile(null);
@@ -76,6 +85,11 @@ export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: strin
     setCopiedTracking(true);
     window.setTimeout(() => setCopiedTracking(false), 1400);
   };
+  const copyBankAccount = async () => {
+    await navigator.clipboard.writeText(thaiBankAccount.accountNumber);
+    setCopiedBankAccount(true);
+    window.setTimeout(() => setCopiedBankAccount(false), 1400);
+  };
 
   return <CustomerShell user={user} isAdmin={isAdmin}>
     <main className="shop-page order-detail-page">
@@ -108,7 +122,14 @@ export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: strin
 
           {order.status === "waiting_payment" && <section id="payment" className="order-panel payment-panel">
             <div className="panel-heading"><div><span>PAYMENT</span><h2>{order.paymentMethod === "bank_transfer" ? "Bank transfer" : "Western Union"}</h2></div></div>
-            <div className="payment-instructions"><strong>{order.paymentMethod === "bank_transfer" ? "PUCYCLES bank account" : "PUCYCLES receiver details"}</strong><p>Payment details will be configured by the store owner before launch.</p></div>
+            {isThaiBankTransfer ? <div className="thai-bank-details">
+              <div><span>ยอดที่ต้องโอน</span><strong>{formatMoney(totalThb, "TH", "th")}</strong></div>
+              <dl>
+                <div><dt>ธนาคาร</dt><dd>{thaiBankAccount.bank}</dd></div>
+                <div><dt>ชื่อบัญชี</dt><dd>{thaiBankAccount.accountName}</dd></div>
+                <div className="bank-account-number"><dt>เลขบัญชี</dt><dd><strong>{thaiBankAccount.formattedAccountNumber}</strong><button type="button" onClick={() => void copyBankAccount()} aria-label="คัดลอกเลขบัญชี" title="คัดลอกเลขบัญชี">{copiedBankAccount ? <Check /> : <Copy />}</button></dd></div>
+              </dl>
+            </div> : <div className="payment-instructions"><strong>PUCYCLES receiver details</strong><p>Contact the store if you need the Western Union receiver information again.</p></div>}
             <label className="proof-upload"><Upload /><span>{file ? file.name : "Choose receipt image"}<small>JPG, PNG or WEBP - Max 5 MB</small></span><input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={(event) => selectFile(event.target.files?.[0])} /></label>
             {fileError && <p className="field-error">{fileError}</p>}
             <button className="shop-primary-button" disabled={!file || busy} onClick={uploadProof}>{busy ? "Uploading..." : "Submit payment proof"}</button>
