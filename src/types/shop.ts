@@ -28,6 +28,7 @@ export type PaymentInstructions = {
   account_name?: string;
   account_number?: string;
   receiver_name?: string;
+  receiver_address?: string;
   country?: string;
   city?: string;
   phone?: string;

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { CustomerShell } from "@/components/customer-shell";
 import { useShop } from "@/components/shop-provider";
 import { formatMoney, orderStatusCopy } from "@/data/commerce";
+import { westernUnionPaymentDetails } from "@/data/payment";
 import type { CustomerUser } from "@/lib/auth/customer";
 import type { CheckoutAddress, OrderStatus } from "@/types/shop";
 
@@ -28,6 +29,7 @@ export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: strin
   const [address, setAddress] = useState<CheckoutAddress | null>(order?.address ?? null);
   const [copiedTracking, setCopiedTracking] = useState(false);
   const [copiedBankAccount, setCopiedBankAccount] = useState(false);
+  const [copiedWesternUnion, setCopiedWesternUnion] = useState(false);
 
   useEffect(() => {
     if (order?.status !== "waiting_payment" || window.location.hash !== "#payment") return;
@@ -46,6 +48,13 @@ export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: strin
   const totalThb = order.subtotalThb + (order.shippingFeeThb ?? 0);
   const isThaiBankTransfer = order.address.countryCode === "TH" && order.paymentMethod === "bank_transfer";
   const payment = order.paymentInstructions;
+  const westernUnion = {
+    bankName: payment.bank_name || westernUnionPaymentDetails.bank_name,
+    accountNumber: payment.account_number || westernUnionPaymentDetails.account_number,
+    receiverName: payment.receiver_name || westernUnionPaymentDetails.receiver_name,
+    receiverAddress: payment.receiver_address || westernUnionPaymentDetails.receiver_address,
+    country: payment.country || westernUnionPaymentDetails.country,
+  };
   const selectFile = (selected?: File) => {
     setFileError("");
     if (!selected) return setFile(null);
@@ -79,11 +88,24 @@ export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: strin
     setCopiedTracking(true);
     window.setTimeout(() => setCopiedTracking(false), 1400);
   };
-  const copyBankAccount = async () => {
-    if (!payment.account_number) return;
-    await navigator.clipboard.writeText(payment.account_number);
+  const copyBankAccount = async (accountNumber: string) => {
+    if (!accountNumber) return;
+    await navigator.clipboard.writeText(accountNumber);
     setCopiedBankAccount(true);
     window.setTimeout(() => setCopiedBankAccount(false), 1400);
+  };
+  const copyWesternUnionDetails = async () => {
+    await navigator.clipboard.writeText([
+      "Payment Method: Western Union",
+      westernUnion.bankName,
+      `Account number ${westernUnion.accountNumber}`,
+      westernUnion.receiverName,
+      "My address is",
+      westernUnion.receiverAddress,
+      westernUnion.country,
+    ].join("\n"));
+    setCopiedWesternUnion(true);
+    window.setTimeout(() => setCopiedWesternUnion(false), 1400);
   };
 
   return <CustomerShell user={user} isAdmin={isAdmin}>
@@ -125,9 +147,21 @@ export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: strin
               <dl>
                 <div><dt>ธนาคาร</dt><dd>{payment.bank_name || "กรุณาติดต่อร้านค้า"}</dd></div>
                 <div><dt>ชื่อบัญชี</dt><dd>{payment.account_name || "กรุณาติดต่อร้านค้า"}</dd></div>
-                <div className="bank-account-number"><dt>เลขบัญชี</dt><dd><strong>{payment.account_number || "กรุณาติดต่อร้านค้า"}</strong>{payment.account_number && <button type="button" onClick={() => void copyBankAccount()} aria-label="คัดลอกเลขบัญชี" title="คัดลอกเลขบัญชี">{copiedBankAccount ? <Check /> : <Copy />}</button>}</dd></div>
+                <div className="bank-account-number"><dt>เลขบัญชี</dt><dd><strong>{payment.account_number || "กรุณาติดต่อร้านค้า"}</strong>{payment.account_number && <button type="button" onClick={() => void copyBankAccount(payment.account_number!)} aria-label="คัดลอกเลขบัญชี" title="คัดลอกเลขบัญชี">{copiedBankAccount ? <Check /> : <Copy />}</button>}</dd></div>
               </dl>
-            </div> : <div className="payment-instructions"><strong>Western Union receiver</strong><p>{payment.receiver_name || "Contact the store for receiver information"}</p>{payment.city && <p>{payment.city}, {payment.country}</p>}{payment.phone && <p>{payment.phone}</p>}{payment.instructions && <p>{payment.instructions}</p>}</div>}
+            </div> : <div className="western-union-details">
+              <div className="western-union-heading"><div><span>AMOUNT TO SEND</span><strong>{formatMoney(totalThb, order.address.countryCode, preferences.locale)}</strong></div><button type="button" onClick={() => void copyWesternUnionDetails()}>{copiedWesternUnion ? <Check /> : <Copy />}{copiedWesternUnion ? "Copied" : "Copy all details"}</button></div>
+              <p className="western-union-note">Enter these recipient details in Western Union exactly as shown.</p>
+              <dl>
+                <div><dt>Payment method</dt><dd>Western Union</dd></div>
+                <div><dt>Bank</dt><dd>{westernUnion.bankName}</dd></div>
+                <div className="bank-account-number"><dt>Account number</dt><dd><strong>{westernUnion.accountNumber}</strong><button type="button" onClick={() => void copyBankAccount(westernUnion.accountNumber)} aria-label="Copy account number" title="Copy account number">{copiedBankAccount ? <Check /> : <Copy />}</button></dd></div>
+                <div><dt>Receiver name</dt><dd>{westernUnion.receiverName}</dd></div>
+                <div><dt>Receiver address</dt><dd>{westernUnion.receiverAddress}<small>{westernUnion.country}</small></dd></div>
+              </dl>
+              {payment.phone && <p className="western-union-extra"><strong>Phone</strong>{payment.phone}</p>}
+              {payment.instructions && <p className="western-union-extra"><strong>Additional instructions</strong>{payment.instructions}</p>}
+            </div>}
             <label className="proof-upload"><Upload /><span>{file ? file.name : "Choose receipt image"}<small>JPG, PNG or WEBP - Max 5 MB</small></span><input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={(event) => selectFile(event.target.files?.[0])} /></label>
             {fileError && <p className="field-error">{fileError}</p>}
             <button className="shop-primary-button" disabled={!file || busy} onClick={uploadProof}>{busy ? "Uploading..." : "Submit payment proof"}</button>

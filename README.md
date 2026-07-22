@@ -11,7 +11,7 @@ Responsive motorcycle-parts storefront and admin system built with Next.js and S
 
 1. Install dependencies with `npm install`.
 2. Copy `.env.example` to `.env.local` and fill in the project values.
-3. For a new Supabase database, run migrations `001`, `002`, then `004` through `012` from `supabase/migrations` in order.
+3. For a new Supabase database, run migrations `001`, `002`, then `004` through `013` from `supabase/migrations` in order.
 4. Create the dedicated admin account by following `ADMIN_ACCOUNT_SETUP.md`.
 5. Start the app with `npm run dev`.
 
@@ -20,6 +20,8 @@ Migration `003` was an incomplete local file and is intentionally excluded. Migr
 Migration `011` adds admin notifications, order history, payment settings, refund controls, login history, and a guarded `pg_cron` job that releases expired stock reservations every 15 minutes. The Admin settings page reports whether that Cron job is active and also provides a manual cleanup action.
 
 Migration `012` adds stock adjustment notes, shipping carrier presets, secure stock-adjustment RPCs, and product image ordering. Run both `011` and `012` in the Supabase SQL Editor before using the latest Admin pages.
+
+Migration `013` sets the current Western Union recipient details for new orders and updates international orders that are still awaiting payment.
 
 ## Product CSV
 
