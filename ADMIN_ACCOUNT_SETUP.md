@@ -4,7 +4,7 @@ The admin area uses a dedicated Supabase Email/Password account. Customer Google
 
 ## One-time setup
 
-1. Open the Supabase SQL Editor. For a new database, run migrations `001`, `002`, then `004` through `009` in order. For an existing database, run only the migrations that have not been applied yet.
+1. Open the Supabase SQL Editor. For a new database, run migrations `001`, `002`, then `004` through `010` in order. For an existing database, run only the migrations that have not been applied yet.
 2. Open **Authentication > Users > Add user > Create new user**.
 3. Use `admin@pucycles.local` as the email.
 4. Create a strong, unique password with at least 12 characters.

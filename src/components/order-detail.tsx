@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Check, CircleAlert, CircleDollarSign, Clock3, Copy, MapPin, PackageCheck, Pencil, Receipt, Save, Trash2, Truck, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -17,7 +18,7 @@ const timeline: Array<{ status: OrderStatus; label: string; icon: typeof Clock3 
 ];
 
 export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: string; user: CustomerUser; isAdmin: boolean }) {
-  const { orders, preferences, hydrated, submitPayment, cancelOrder, updateOrderAddress } = useShop();
+  const { orders, preferences, hydrated, submitPayment, cancelOrder, updateOrderAddress, products } = useShop();
   const order = orders.find((item) => item.orderNumber === orderNumber);
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState("");
@@ -95,7 +96,10 @@ export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: strin
         <div className="order-main-column">
           <section className="order-panel">
             <div className="panel-heading"><h2>Items</h2><span>{order.lines.reduce((sum, line) => sum + line.quantity, 0)} items</span></div>
-            {order.lines.map((line) => <div className="order-line" key={line.productId}><div><span>{line.sku}</span><strong>{line.name}</strong><small>Quantity {line.quantity}</small></div><strong>{formatMoney(line.unitPriceThb * line.quantity, order.address.countryCode, preferences.locale)}</strong></div>)}
+            {order.lines.map((line) => {
+              const product = products.find((item) => item.id === line.productId);
+              return <div className="order-line" key={line.productId}><div className="order-line-thumb">{product?.imageUrls?.[0] ? <Image src={product.imageUrls[0]} alt={line.name} fill sizes="54px" /> : <Receipt />}</div><div className="order-line-copy"><span>{line.sku}</span><strong>{line.name}</strong><small>Quantity {line.quantity}</small></div><strong>{formatMoney(line.unitPriceThb * line.quantity, order.address.countryCode, preferences.locale)}</strong></div>;
+            })}
           </section>
 
           {order.status === "shipping_quote" && <section className="action-panel waiting"><Clock3 /><div><h2>Shipping quote in progress</h2><p>The store is checking Thailand Post rates using the order weight and destination. Payment will open after the final total is confirmed.</p></div></section>}

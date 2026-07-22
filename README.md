@@ -11,7 +11,7 @@ Responsive motorcycle-parts storefront and admin system built with Next.js and S
 
 1. Install dependencies with `npm install`.
 2. Copy `.env.example` to `.env.local` and fill in the project values.
-3. For a new Supabase database, run migrations `001`, `002`, then `004` through `009` from `supabase/migrations` in order.
+3. For a new Supabase database, run migrations `001`, `002`, then `004` through `010` from `supabase/migrations` in order.
 4. Create the dedicated admin account by following `ADMIN_ACCOUNT_SETUP.md`.
 5. Start the app with `npm run dev`.
 

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { ArrowRight, Check, LockKeyhole, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -9,7 +10,7 @@ import { countries, formatMoney, getCountry } from "@/data/commerce";
 import type { CustomerUser } from "@/lib/auth/customer";
 import type { CheckoutAddress, CountryCode } from "@/types/shop";
 
-export function CheckoutForm({ user, isAdmin, savedAddress }: { user: CustomerUser; isAdmin: boolean; savedAddress: CheckoutAddress | null }) {
+export function CheckoutForm({ user, isAdmin, savedAddress, thaiShippingFeeThb }: { user: CustomerUser; isAdmin: boolean; savedAddress: CheckoutAddress | null; thaiShippingFeeThb: number }) {
   const router = useRouter();
   const { cart, preferences, placeOrder, setPreferences, products } = useShop();
   const [submitting, setSubmitting] = useState(false);
@@ -22,12 +23,16 @@ export function CheckoutForm({ user, isAdmin, savedAddress }: { user: CustomerUs
     countryCode: preferences.countryCode,
     postalCode: "",
   });
-  const subtotal = useMemo(
-    () => cart.reduce((sum, line) => sum + (products.find((product) => product.id === line.productId)?.priceThb ?? 0) * line.quantity, 0),
+  const lines = useMemo(
+    () => cart.flatMap((line) => {
+      const product = products.find((item) => item.id === line.productId);
+      return product ? [{ ...line, product }] : [];
+    }),
     [cart, products],
   );
+  const subtotal = useMemo(() => lines.reduce((sum, line) => sum + line.product.priceThb * line.quantity, 0), [lines]);
   const thai = address.countryCode === "TH";
-  const shipping = thai ? 120 : null;
+  const shipping = thai ? thaiShippingFeeThb : null;
   const country = getCountry(address.countryCode);
 
   const submit = async (event: React.FormEvent) => {
@@ -67,6 +72,7 @@ export function CheckoutForm({ user, isAdmin, savedAddress }: { user: CustomerUs
 
         <aside className="order-summary">
           <h2>Order summary</h2>
+          <div className="checkout-items">{lines.map(({ product, quantity }) => <article key={product.id}><div className="checkout-item-thumb">{product.imageUrls?.[0] ? <Image src={product.imageUrls[0]} alt={product.name} fill sizes="46px" /> : null}</div><div><strong>{preferences.locale === "th" ? product.nameTh : product.name}</strong><span>{quantity} × {formatMoney(product.priceThb, address.countryCode, preferences.locale)}</span></div></article>)}</div>
           <div><span>{cart.reduce((sum, line) => sum + line.quantity, 0)} items</span><strong>{formatMoney(subtotal, address.countryCode, preferences.locale)}</strong></div>
           <div><span>Shipping</span><strong>{shipping === null ? "Pending quote" : formatMoney(shipping, address.countryCode, preferences.locale)}</strong></div>
           <div className="summary-total"><span>Total</span><strong>{shipping === null ? "Confirmed later" : formatMoney(subtotal + shipping, address.countryCode, preferences.locale)}</strong></div>

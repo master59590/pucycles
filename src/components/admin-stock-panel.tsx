@@ -1,6 +1,6 @@
 "use client";
 
-import { PackagePlus, Search } from "lucide-react";
+import { PackageMinus, PackagePlus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { AdminProduct } from "@/lib/admin-products";
@@ -48,16 +48,43 @@ export function AdminStockPanel({ products }: { products: AdminProduct[] }) {
     setBusyProductId(null);
   };
 
+  const issueStock = async (product: AdminProduct) => {
+    const quantity = quantities[product.id] ?? 0;
+    const available = Math.max(0, product.stockQuantity - product.reservedQuantity);
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > available) {
+      setError(`เบิกได้ไม่เกินจำนวนพร้อมขาย ${available} ชิ้น`);
+      return;
+    }
+    if (!window.confirm(`ยืนยันเบิก ${product.nameEn} จำนวน ${quantity} ชิ้น สำหรับลูกค้าหน้าร้านหรือไม่?`)) return;
+
+    setBusyProductId(product.id);
+    setMessage("");
+    setError("");
+    const { error: issueError } = await createClient().rpc("admin_issue_stock", {
+      p_product_id: product.id,
+      p_quantity: quantity,
+    });
+    if (issueError) {
+      setError(issueError.message);
+    } else {
+      setQuantities((current) => ({ ...current, [product.id]: 0 }));
+      setMessage(`เบิก ${product.nameEn} ใช้หน้าร้านแล้ว ${quantity} ชิ้น`);
+      router.refresh();
+    }
+    setBusyProductId(null);
+  };
+
   return <main>
-    <div className="admin-page-heading"><div><span>คลังสินค้า</span><h1>จัดการสต็อก</h1><p>รับสินค้าเข้าได้อย่างรวดเร็วโดยไม่ต้องเปิดแก้ไขสินค้าทีละรายการ</p></div></div>
+    <div className="admin-page-heading"><div><span>คลังสินค้า</span><h1>จัดการสต็อก</h1><p>รับสินค้าเข้า หรือเบิกใช้กับลูกค้าหน้าร้าน โดยไม่กระทบยอดจองออนไลน์</p></div></div>
     {message && <p className="admin-action-message success" role="status">{message}</p>}
     {error && <p className="admin-action-message error" role="alert">{error}</p>}
     <div className="admin-toolbar admin-stock-toolbar"><label><Search /><input aria-label="ค้นหาสต็อก" placeholder="ค้นหาชื่อ แบรนด์ หรือ SKU" value={query} onChange={(event) => setQuery(event.target.value)} /></label></div>
-    <div className="admin-table-wrap"><table className="admin-table admin-stock-table"><thead><tr><th>สินค้า</th><th>ทั้งหมด</th><th>จองแล้ว</th><th>พร้อมขาย</th><th>สถานะ</th><th>รับสินค้าเข้า</th></tr></thead><tbody>
+    <div className="admin-table-wrap"><table className="admin-table admin-stock-table"><thead><tr><th>สินค้า</th><th>ทั้งหมด</th><th>จองแล้ว</th><th>พร้อมขาย</th><th>สถานะ</th><th>ปรับสต็อก</th></tr></thead><tbody>
       {activeProducts.map((product) => {
         const quantity = quantities[product.id] ?? 0;
         const status = { in_stock: "มีสินค้า", low_stock: "เหลือน้อย", out_of_stock: "สินค้าหมด" }[product.status];
-        return <tr key={product.id}><td><strong>{product.sku}</strong><span>{product.nameEn}</span><small>{product.brandName}</small></td><td>{product.stockQuantity}</td><td>{product.reservedQuantity}</td><td><strong>{Math.max(0, product.stockQuantity - product.reservedQuantity)}</strong></td><td><span className={`admin-status ${product.status}`}>{status}</span></td><td><div className="admin-stock-receive"><div>{presets.map((preset) => <button type="button" key={preset} disabled={busyProductId !== null} onClick={() => setQuantities((current) => ({ ...current, [product.id]: preset }))}>+{preset}</button>)}</div><input type="number" min="1" max="100000" step="1" aria-label={`จำนวนรับเข้าของ ${product.nameEn}`} value={quantity || ""} placeholder="จำนวน" onChange={(event) => setQuantities((current) => ({ ...current, [product.id]: Number(event.target.value) }))} /><button className="admin-primary-button" disabled={busyProductId !== null || quantity < 1} onClick={() => void receiveStock(product)}><PackagePlus />{busyProductId === product.id ? "กำลังเพิ่ม..." : "รับเข้า"}</button></div></td></tr>;
+        const available = Math.max(0, product.stockQuantity - product.reservedQuantity);
+        return <tr key={product.id}><td><strong>{product.sku}</strong><span>{product.nameEn}</span><small>{product.brandName}</small></td><td>{product.stockQuantity}</td><td>{product.reservedQuantity}</td><td><strong>{available}</strong></td><td><span className={`admin-status ${product.status}`}>{status}</span></td><td><div className="admin-stock-receive"><div>{presets.map((preset) => <button type="button" key={preset} disabled={busyProductId !== null} onClick={() => setQuantities((current) => ({ ...current, [product.id]: preset }))}>{preset}</button>)}</div><input type="number" min="1" max="100000" step="1" aria-label={`จำนวนปรับสต็อกของ ${product.nameEn}`} value={quantity || ""} placeholder="จำนวน" onChange={(event) => setQuantities((current) => ({ ...current, [product.id]: Number(event.target.value) }))} /><button className="admin-primary-button" disabled={busyProductId !== null || quantity < 1} onClick={() => void receiveStock(product)}><PackagePlus />{busyProductId === product.id ? "กำลังบันทึก..." : "รับเข้า"}</button><button className="admin-secondary-button admin-stock-issue" disabled={busyProductId !== null || quantity < 1 || quantity > available} onClick={() => void issueStock(product)}><PackageMinus />เบิกหน้าร้าน</button></div></td></tr>;
       })}
     </tbody></table>{!activeProducts.length && <div className="admin-empty-state">ไม่พบสินค้าที่ตรงกับการค้นหา</div>}</div>
   </main>;
