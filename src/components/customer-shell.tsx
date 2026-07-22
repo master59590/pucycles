@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Camera, CircleUserRound, ExternalLink, LogOut, Menu, MessageCircle, ShoppingBag, X } from "lucide-react";
+import { Camera, CircleUserRound, ExternalLink, LogOut, Menu, ShoppingBag, X } from "lucide-react";
 import { useState } from "react";
 import { countries, getCountry } from "@/data/commerce";
 import type { CustomerUser } from "@/lib/auth/customer";
@@ -41,6 +41,7 @@ export function CustomerShell({ children, user }: { children: React.ReactNode; u
           <Link href="/products">{labels.shop}</Link>
           <Link href="/products?view=models">{labels.models}</Link>
           <Link href="/products?view=brands">{labels.brands}</Link>
+          <Link href="/#contact">{labels.contact}</Link>
           <Link href="/orders">{labels.orders}</Link>
         </nav>
         <div className="header-actions">
@@ -58,13 +59,14 @@ export function CustomerShell({ children, user }: { children: React.ReactNode; u
         <Link href="/products" onClick={() => setMenuOpen(false)}>{labels.shop}</Link>
         <Link href="/products?view=models" onClick={() => setMenuOpen(false)}>{labels.models}</Link>
         <Link href="/products?view=brands" onClick={() => setMenuOpen(false)}>{labels.brands}</Link>
+        <Link href="/#contact" onClick={() => setMenuOpen(false)}>{labels.contact}</Link>
         <Link href="/orders" onClick={() => setMenuOpen(false)}>{labels.orders}</Link>
         {!user && <Link href="/login">Sign in with Google</Link>}
       </nav>}
 
       {children}
 
-      <footer className="site-footer">
+      <footer className="site-footer" id="contact">
         <div className="site-footer-main">
           <div className="site-footer-brand">
             <Image src="/pucycles-logo.jpg" alt="PUCYCLES" width={64} height={64} />
@@ -73,7 +75,7 @@ export function CustomerShell({ children, user }: { children: React.ReactNode; u
           <nav className="footer-contact" aria-label={labels.contact}>
             <span>{labels.contact}</span>
             <a href="https://www.instagram.com/pucycles" target="_blank" rel="noopener noreferrer"><Camera aria-hidden="true" /><div><strong>Instagram</strong><small>@pucycles</small></div><ExternalLink aria-hidden="true" /></a>
-            <a href="https://www.facebook.com/Pucyclescustom" target="_blank" rel="noopener noreferrer"><MessageCircle aria-hidden="true" /><div><strong>Facebook</strong><small>PUCYCLES Custom</small></div><ExternalLink aria-hidden="true" /></a>
+            <a href="https://www.facebook.com/Pucyclescustom" target="_blank" rel="noopener noreferrer"><span className="footer-facebook-icon" aria-hidden="true">f</span><div><strong>Facebook</strong><small>PUCYCLES Custom</small></div><ExternalLink aria-hidden="true" /></a>
           </nav>
           <nav className="footer-policies" aria-label="Shop policies"><span>{preferences.locale === "th" ? "ข้อมูลร้านค้า" : "Shop information"}</span><Link href="/policies#shipping">{preferences.locale === "th" ? "การจัดส่ง" : "Shipping"}</Link><Link href="/policies#returns">{preferences.locale === "th" ? "การคืนสินค้า" : "Returns"}</Link><Link href="/policies#warranty">{preferences.locale === "th" ? "การรับประกัน" : "Warranty"}</Link><Link href="/policies#privacy">{preferences.locale === "th" ? "ความเป็นส่วนตัว" : "Privacy"}</Link><Link href="/policies#terms">{preferences.locale === "th" ? "เงื่อนไขการขาย" : "Terms"}</Link></nav>
         </div>

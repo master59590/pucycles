@@ -43,6 +43,11 @@ export function Storefront({ user, showHero = true }: { user: CustomerUser | nul
   const t = copy[preferences.locale];
   const country = getCountry(preferences.countryCode);
   const modelOptions = useMemo(() => [...new Set(products.flatMap((product) => product.models))].sort(), [products]);
+  const featuredModels = useMemo(() => modelOptions
+    .map((name) => ({ name, productCount: products.filter((product) => product.models.includes(name)).length }))
+    .sort((left, right) => right.productCount - left.productCount || left.name.localeCompare(right.name))
+    .slice(0, 3)
+    .map((item) => item.name), [modelOptions, products]);
   const categoryOptions = useMemo(() => [...new Set(products.map((product) => product.category))].sort(), [products]);
   const brandOptions = useMemo(() => [...new Set(products.map((product) => product.brand))].sort(), [products]);
   const yearOptions = useMemo(() => {
@@ -83,7 +88,7 @@ export function Storefront({ user, showHero = true }: { user: CustomerUser | nul
       <main id="top">
         {showHero && <section className="intro-band">
           <div className="intro-copy"><span className="eyebrow"><Bike aria-hidden="true" />{t.curated}</span><h1>{t.title}</h1><p>{t.intro}</p><a className="primary-link" href="#catalog">{t.browse}<ChevronDown aria-hidden="true" /></a></div>
-          <div className="model-panel" id="models">{modelOptions.map((item, index) => <button key={item} onClick={() => { setModel(item); document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" }); }}><span>{String(index + 1).padStart(2, "0")}</span>{item}<ChevronDown aria-hidden="true" /></button>)}</div>
+          <div className="model-panel" id="models">{featuredModels.map((item, index) => <button key={item} onClick={() => { setModel(item); document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" }); }}><span>{String(index + 1).padStart(2, "0")}</span>{item}<ChevronDown aria-hidden="true" /></button>)}</div>
         </section>}
 
         <section className={`catalog ${showHero ? "" : "catalog-page"}`} id="catalog">

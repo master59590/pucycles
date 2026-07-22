@@ -139,6 +139,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .footer-contact a { min-height: 58px; padding: 10px 12px; display: grid; grid-template-columns: 24px minmax(0, 1fr) 16px; align-items: center; gap: 9px; border: 1px solid #363636; border-radius: 5px; color: white; text-decoration: none; }
 .footer-contact a:hover { border-color: var(--red); background: #202020; }
 .footer-contact a > svg:first-child { width: 20px; color: #e46767; }
+.footer-facebook-icon { width: 20px; display: grid; place-items: center; color: #e46767; font: 900 22px/1 Arial, sans-serif; }
 .footer-contact a > svg:last-child { width: 13px; color: #777; }
 .footer-contact a strong, .footer-contact a small { display: block; }
 .footer-contact a strong { font-size: 11px; }
