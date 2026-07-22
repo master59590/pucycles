@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { CircleUserRound, LogOut, Menu, ShoppingBag, X } from "lucide-react";
+import { Camera, CircleUserRound, ExternalLink, LogOut, Menu, MessageCircle, ShoppingBag, X } from "lucide-react";
 import { useState } from "react";
 import { countries, getCountry } from "@/data/commerce";
 import type { CustomerUser } from "@/lib/auth/customer";
@@ -13,8 +13,8 @@ export function CustomerShell({ children, user }: { children: React.ReactNode; u
   const { preferences, setPreferences, cartCount } = useShop();
   const country = getCountry(preferences.countryCode);
   const labels = preferences.locale === "th"
-    ? { shop: "สินค้า", models: "รุ่นรถ", brands: "แบรนด์", orders: "คำสั่งซื้อ" }
-    : { shop: "Shop", models: "Motorcycles", brands: "Brands", orders: "My orders" };
+    ? { shop: "สินค้า", models: "รุ่นรถ", brands: "แบรนด์", orders: "คำสั่งซื้อ", contact: "ช่องทางติดต่อ", market: "ประเทศและสกุลเงิน" }
+    : { shop: "Shop", models: "Motorcycles", brands: "Brands", orders: "My orders", contact: "Contact", market: "Country and currency" };
 
   return (
     <div className="site-shell">
@@ -64,10 +64,19 @@ export function CustomerShell({ children, user }: { children: React.ReactNode; u
 
       {children}
 
-      <footer>
-        <Image src="/pucycles-logo.jpg" alt="" width={54} height={54} />
-        <span>PUCYCLES · LIVE TO RIDE · RIDE TO LIVE</span>
-        <span>{country.name} · {country.currency}</span>
+      <footer className="site-footer">
+        <div className="site-footer-main">
+          <div className="site-footer-brand">
+            <Image src="/pucycles-logo.jpg" alt="PUCYCLES" width={64} height={64} />
+            <div><strong>PUCYCLES</strong><span>LIVE TO RIDE · RIDE TO LIVE</span></div>
+          </div>
+          <nav className="footer-contact" aria-label={labels.contact}>
+            <span>{labels.contact}</span>
+            <a href="https://www.instagram.com/pucycles" target="_blank" rel="noopener noreferrer"><Camera aria-hidden="true" /><div><strong>Instagram</strong><small>@pucycles</small></div><ExternalLink aria-hidden="true" /></a>
+            <a href="https://www.facebook.com/Pucyclescustom" target="_blank" rel="noopener noreferrer"><MessageCircle aria-hidden="true" /><div><strong>Facebook</strong><small>PUCYCLES Custom</small></div><ExternalLink aria-hidden="true" /></a>
+          </nav>
+        </div>
+        <div className="site-footer-bottom"><span>© PUCYCLES Custom Bike Parts</span><span><small>{labels.market}</small>{country.name} · {country.currency}</span></div>
       </footer>
     </div>
   );

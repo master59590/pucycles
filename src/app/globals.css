@@ -123,9 +123,24 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .catalog-page { min-height: calc(100vh - 212px); padding-top: 56px; }
 
-footer { min-height: 92px; padding: 18px 4vw; display: flex; align-items: center; gap: 18px; border-top: 1px solid var(--line); background: #f7f7f6; color: #666; font-size: 11px; font-weight: 700; }
-footer img { border-radius: 50%; object-fit: cover; }
-footer span:last-child { margin-left: auto; }
+.site-footer { padding: 0 4vw; border-top: 3px solid var(--red); background: #151515; color: white; }
+.site-footer-main { min-height: 180px; padding: 32px 0; display: flex; align-items: center; justify-content: space-between; gap: 40px; }
+.site-footer-brand { display: flex; align-items: center; gap: 16px; }
+.site-footer-brand img { width: 64px; height: 64px; flex: 0 0 auto; border-radius: 50%; object-fit: cover; }
+.site-footer-brand strong { display: block; font-size: 19px; letter-spacing: 0; }
+.site-footer-brand span { margin-top: 5px; display: block; color: #999; font-size: 9px; font-weight: 800; letter-spacing: 1.2px; }
+.footer-contact { display: grid; grid-template-columns: repeat(2, minmax(190px, 230px)); gap: 8px; }
+.footer-contact > span { grid-column: 1 / -1; margin-bottom: 3px; color: #999; font-size: 9px; font-weight: 900; letter-spacing: 1.3px; text-transform: uppercase; }
+.footer-contact a { min-height: 58px; padding: 10px 12px; display: grid; grid-template-columns: 24px minmax(0, 1fr) 16px; align-items: center; gap: 9px; border: 1px solid #363636; border-radius: 5px; color: white; text-decoration: none; }
+.footer-contact a:hover { border-color: var(--red); background: #202020; }
+.footer-contact a > svg:first-child { width: 20px; color: #e46767; }
+.footer-contact a > svg:last-child { width: 13px; color: #777; }
+.footer-contact a strong, .footer-contact a small { display: block; }
+.footer-contact a strong { font-size: 11px; }
+.footer-contact a small { margin-top: 3px; color: #999; font-size: 9px; }
+.site-footer-bottom { min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-top: 1px solid #333; color: #888; font-size: 9px; }
+.site-footer-bottom > span:last-child { display: flex; align-items: center; gap: 10px; color: #bbb; font-size: 10px; font-weight: 800; }
+.site-footer-bottom small { color: #777; font-size: 8px; font-weight: 500; text-transform: uppercase; }
 
 .login-page { min-height: 100vh; display: grid; grid-template-columns: minmax(360px, .85fr) minmax(480px, 1.15fr); background: white; }
 .login-brand-panel { min-height: 100vh; padding: 42px max(4vw, 52px); display: flex; flex-direction: column; justify-content: space-between; background: var(--ink); color: white; position: relative; overflow: hidden; }
@@ -687,8 +702,12 @@ footer span:last-child { margin-left: auto; }
   .fitment { display: none; }
   .product-footer { align-items: stretch; flex-direction: column; }
   .product-footer button { width: 100%; }
-  footer { flex-wrap: wrap; }
-  footer span:last-child { margin-left: 72px; width: 100%; }
+  .site-footer { padding: 0 16px; }
+  .site-footer-main { min-height: 0; padding: 28px 0 22px; align-items: flex-start; flex-direction: column; gap: 25px; }
+  .footer-contact { width: 100%; grid-template-columns: 1fr; }
+  .footer-contact > span { grid-column: auto; }
+  .site-footer-bottom { padding: 14px 0; align-items: flex-start; flex-direction: column; gap: 8px; }
+  .site-footer-bottom > span:last-child { width: 100%; justify-content: space-between; }
   .login-page { grid-template-columns: 1fr; }
   .login-brand-panel { min-height: 255px; padding: 24px 22px 28px; }
   .login-brand-panel::after { right: -10px; bottom: -70px; font-size: 230px; }
