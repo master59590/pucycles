@@ -62,6 +62,34 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .model-panel button span { color: #f1a3a3; font-size: 11px; }
 .model-panel button svg { width: 18px; transform: rotate(-90deg); }
 
+.trust-section { padding: 52px max(4vw, calc((100vw - 1380px) / 2)) 28px; background: white; }
+.trust-heading { display: grid; grid-template-columns: minmax(260px, .65fr) minmax(300px, .85fr); align-items: end; gap: 34px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+.trust-heading h2 { margin: 7px 0 0; font-size: 34px; letter-spacing: 0; }
+.trust-heading p { max-width: 640px; margin: 0; color: #666; font-size: 14px; line-height: 1.7; }
+.trust-grid { padding-top: 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
+.trust-grid article { min-height: 152px; padding: 22px 22px 22px 0; display: grid; align-content: start; gap: 10px; border-right: 1px solid var(--line); }
+.trust-grid article:not(:first-child) { padding-left: 22px; }
+.trust-grid article:last-child { border-right: 0; }
+.trust-grid svg { width: 26px; height: 26px; color: var(--red); }
+.trust-grid strong { font-size: 13px; line-height: 1.35; }
+.trust-grid p { margin: 0; color: #666; font-size: 11px; line-height: 1.55; }
+.order-guide { padding: 38px max(4vw, calc((100vw - 1380px) / 2)); display: grid; grid-template-columns: minmax(260px, .5fr) minmax(420px, 1fr); gap: 40px; background: #f7f7f6; border-top: 1px solid #eeeeec; border-bottom: 1px solid #eeeeec; }
+.order-guide-copy h2 { max-width: 420px; margin: 8px 0 0; font-size: 30px; line-height: 1.18; letter-spacing: 0; }
+.order-guide-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.order-guide-columns article { padding: 24px; border-left: 4px solid var(--red); background: white; }
+.order-guide-columns h3 { margin: 0 0 18px; font-size: 16px; }
+.order-guide-columns ol { margin: 0; padding: 0; display: grid; gap: 13px; counter-reset: order-step; list-style: none; }
+.order-guide-columns li { min-height: 28px; padding-left: 42px; position: relative; color: #555; font-size: 12px; line-height: 1.55; }
+.order-guide-columns li::before { counter-increment: order-step; content: counter(order-step, decimal-leading-zero); width: 28px; height: 28px; position: absolute; left: 0; top: -2px; display: grid; place-items: center; background: var(--ink); color: white; font-size: 10px; font-weight: 900; }
+.shipping-payment { padding: 34px max(4vw, calc((100vw - 1380px) / 2)); display: grid; grid-template-columns: minmax(320px, .62fr) minmax(360px, 1fr); align-items: center; gap: 34px; background: #171717; color: white; }
+.shipping-payment h2 { margin: 7px 0 12px; font-size: 32px; letter-spacing: 0; }
+.shipping-payment p { margin: 0; color: #c9c9c9; font-size: 13px; line-height: 1.7; }
+.shipping-payment > div:last-child { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: #383838; }
+.shipping-payment article { min-height: 128px; padding: 20px; display: grid; grid-template-columns: 28px 1fr; gap: 12px; background: #1f1f1f; }
+.shipping-payment article svg { width: 24px; color: #ef9a9a; }
+.shipping-payment article strong { display: block; font-size: 13px; }
+.shipping-payment article p { margin-top: 6px; color: #aaa; font-size: 10px; line-height: 1.55; }
+
 .catalog { padding: 64px max(4vw, calc((100vw - 1380px) / 2)) 80px; }
 .catalog-heading { display: grid; grid-template-columns: 1fr minmax(320px, 480px); align-items: end; gap: 30px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
 .section-kicker { color: var(--red); font-size: 10px; font-weight: 900; letter-spacing: 1.5px; }
@@ -843,6 +871,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .mobile-nav a { min-height: 46px; display: flex; align-items: center; color: var(--ink); text-decoration: none; border-bottom: 1px solid #eee; font-size: 13px; font-weight: 800; }
   .mobile-nav a:last-child { color: var(--red); border-bottom: 0; }
   .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .trust-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .trust-grid article:nth-child(2) { border-right: 0; }
+  .trust-grid article:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .order-guide, .shipping-payment { grid-template-columns: 1fr; }
   .admin-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-orders-layout { grid-template-columns: 1fr; }
   .product-detail-layout { gap: 30px; }
@@ -865,6 +897,19 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .intro-copy h1 { font-size: 42px; }
   .model-panel { grid-template-rows: none; }
   .model-panel button { min-height: 66px; padding: 14px 20px; font-size: 14px; }
+  .trust-section { padding: 36px 16px 22px; }
+  .trust-heading { grid-template-columns: 1fr; gap: 12px; }
+  .trust-heading h2 { font-size: 27px; }
+  .trust-grid { grid-template-columns: 1fr; border-bottom: 0; }
+  .trust-grid article, .trust-grid article:not(:first-child) { min-height: auto; padding: 18px 0; border-right: 0; border-top: 1px solid var(--line); }
+  .order-guide { padding: 34px 16px; gap: 24px; }
+  .order-guide-copy h2 { font-size: 27px; }
+  .order-guide-columns { grid-template-columns: 1fr; }
+  .order-guide-columns article { padding: 20px; }
+  .shipping-payment { padding: 32px 16px; gap: 22px; }
+  .shipping-payment h2 { font-size: 27px; }
+  .shipping-payment > div:last-child { grid-template-columns: 1fr; }
+  .shipping-payment article { min-height: 0; }
   .catalog { padding: 44px 16px 60px; }
   .catalog-heading { grid-template-columns: 1fr auto; align-items: center; gap: 14px; }
   .catalog-heading > div:first-child { grid-column: 1 / 2; }
