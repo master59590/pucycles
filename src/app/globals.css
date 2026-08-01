@@ -163,7 +163,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .catalog-browse button.active { border-color: var(--red); background: var(--red); color: white; }
 
 .site-footer { padding: 0 4vw; border-top: 3px solid var(--red); background: #151515; color: white; }
-.site-footer-main { min-height: 180px; padding: 32px 0; display: flex; align-items: center; justify-content: space-between; gap: 40px; }
+.site-footer-main { min-height: 180px; padding: 32px 0; display: grid; grid-template-columns: minmax(210px, 1fr) minmax(300px, auto) minmax(220px, auto) minmax(150px, auto); align-items: center; gap: 30px; }
 .site-footer-brand { display: flex; align-items: center; gap: 16px; }
 .site-footer-brand img { width: 64px; height: 64px; flex: 0 0 auto; border-radius: 50%; object-fit: cover; }
 .site-footer-brand strong { display: block; font-size: 19px; letter-spacing: 0; }
@@ -178,6 +178,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .footer-contact a strong, .footer-contact a small { display: block; }
 .footer-contact a strong { font-size: 11px; }
 .footer-contact a small { margin-top: 3px; color: #999; font-size: 9px; }
+.footer-address { margin: 0; min-width: 210px; display: grid; gap: 8px; color: #ccc; font-style: normal; }
+.footer-address > span { color: #999; font-size: 9px; font-weight: 900; letter-spacing: 1.3px; text-transform: uppercase; }
+.footer-address > div { display: grid; grid-template-columns: 22px 1fr; gap: 8px; align-items: start; }
+.footer-address svg { width: 18px; color: #e46767; }
+.footer-address p { margin: 0; font-size: 10px; line-height: 1.65; }
 .footer-policies { min-width: 150px; display: grid; gap: 7px; }
 .footer-policies > span { margin-bottom: 2px; color: #999; font-size: 9px; font-weight: 900; letter-spacing: 1.3px; text-transform: uppercase; }
 .footer-policies a { width: fit-content; color: #ccc; font-size: 10px; text-decoration: none; }
@@ -929,8 +934,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .product-footer { align-items: stretch; flex-direction: column; }
   .product-footer button { width: 100%; }
   .site-footer { padding: 0 16px; }
-  .site-footer-main { min-height: 0; padding: 28px 0 22px; align-items: flex-start; flex-direction: column; gap: 25px; }
+  .site-footer-main { min-height: 0; padding: 28px 0 22px; display: flex; align-items: flex-start; flex-direction: column; gap: 25px; }
   .footer-policies { width: 100%; }
+  .footer-address { width: 100%; }
   .footer-contact { width: 100%; grid-template-columns: 1fr; }
   .footer-contact > span { grid-column: auto; }
   .site-footer-bottom { padding: 14px 0; align-items: flex-start; flex-direction: column; gap: 8px; }

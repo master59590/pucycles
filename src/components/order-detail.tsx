@@ -23,17 +23,17 @@ const orderDetailCopy = {
     items: "Items", itemUnit: "items", quantity: "Quantity", quoteProgress: "Shipping quote in progress",
     quoteProgressText: "The store is checking Thailand Post rates using the order weight and destination. Payment will open after the final total is confirmed.",
     quoteKicker: "SHIPPING QUOTE", quoteTitle: "Review the final delivery cost", itemSubtotal: "Items", thailandPostShipping: "Thailand Post shipping",
-    totalEstimate: "Total estimate", quoteNote: "Final payment is made in THB. Import duties and destination charges are not included.",
+    totalEstimate: "Total", quoteNote: "Final payment is made in THB. Import duties and destination charges are not included.",
     declineCancel: "Decline and cancel", confirming: "Confirming...", acceptQuote: "Accept shipping quote",
     proofRejected: "Payment proof was not accepted", proofRejectedText: "Please check the payment details and upload a new receipt below.",
     paymentKicker: "PAYMENT", bankTransfer: "Bank transfer", amountToTransfer: "Amount to transfer", bank: "Bank", accountName: "Account name",
     accountNumber: "Account number", contactStore: "Please contact the store", copyAccount: "Copy account number", amountToSend: "AMOUNT TO SEND",
-    approx: "Approx.", copied: "Copied", copyAll: "Copy all details", westernNote: "Enter these recipient details in Western Union exactly as shown.",
+    copied: "Copied", copyAll: "Copy all details", westernNote: "Enter these recipient details in Western Union exactly as shown.",
     paymentMethod: "Payment method", receiverName: "Receiver name", receiverAddress: "Receiver address", phone: "Phone", additional: "Additional instructions",
     chooseReceipt: "Choose receipt image", receiptHint: "JPG, PNG or WEBP - Max 5 MB", uploading: "Uploading...", submitProof: "Submit payment proof",
     receiptSubmitted: "Receipt submitted", receiptReview: "The store will review it manually.", trackingKicker: "TRACKING", carrier: "Carrier",
     trackingPending: "Tracking number pending", copyTracking: "Copy tracking number", summary: "Summary", subtotal: "Subtotal", shipping: "Shipping",
-    pending: "Pending", total: "Total", pendingQuote: "Pending quote", rateSnapshot: "Rate snapshot", delivery: "Delivery", edit: "Edit",
+    pending: "Pending", total: "Total", pendingQuote: "Pending quote", delivery: "Delivery", edit: "Edit",
     name: "Name", address: "Address", saving: "Saving...", saveAddress: "Save address",
   },
   th: {
@@ -46,17 +46,17 @@ const orderDetailCopy = {
     items: "สินค้า", itemUnit: "รายการ", quantity: "จำนวน", quoteProgress: "กำลังตรวจสอบค่าจัดส่ง",
     quoteProgressText: "ร้านกำลังตรวจสอบค่าจัดส่งไปรษณีย์ไทยจากน้ำหนักและประเทศปลายทาง ระบบจะเปิดให้ชำระหลังยืนยันยอดแล้ว",
     quoteKicker: "ค่าจัดส่ง", quoteTitle: "ตรวจสอบค่าจัดส่งและยอดสุดท้าย", itemSubtotal: "ค่าสินค้า", thailandPostShipping: "ค่าจัดส่งไปรษณีย์ไทย",
-    totalEstimate: "ยอดรวมโดยประมาณ", quoteNote: "ชำระเงินจริงเป็นเงินบาท โดยยอดนี้ยังไม่รวมภาษีนำเข้าและค่าธรรมเนียมของประเทศปลายทาง",
+    totalEstimate: "ยอดรวม", quoteNote: "ชำระเงินจริงเป็นเงินบาท โดยยอดนี้ยังไม่รวมภาษีนำเข้าและค่าธรรมเนียมของประเทศปลายทาง",
     declineCancel: "ไม่ยอมรับและยกเลิก", confirming: "กำลังยืนยัน...", acceptQuote: "ยอมรับค่าจัดส่ง",
     proofRejected: "หลักฐานการชำระเงินไม่ผ่านการตรวจสอบ", proofRejectedText: "กรุณาตรวจสอบข้อมูลการชำระเงินและแนบรูปใบเสร็จใหม่ด้านล่าง",
     paymentKicker: "การชำระเงิน", bankTransfer: "โอนผ่านธนาคาร", amountToTransfer: "ยอดที่ต้องโอน", bank: "ธนาคาร", accountName: "ชื่อบัญชี",
     accountNumber: "เลขบัญชี", contactStore: "กรุณาติดต่อร้านค้า", copyAccount: "คัดลอกเลขบัญชี", amountToSend: "ยอดที่ต้องชำระ",
-    approx: "ประมาณ", copied: "คัดลอกแล้ว", copyAll: "คัดลอกข้อมูลทั้งหมด", westernNote: "กรอกข้อมูลผู้รับใน Western Union ให้ตรงตามที่แสดงด้านล่าง",
+    copied: "คัดลอกแล้ว", copyAll: "คัดลอกข้อมูลทั้งหมด", westernNote: "กรอกข้อมูลผู้รับใน Western Union ให้ตรงตามที่แสดงด้านล่าง",
     paymentMethod: "วิธีชำระเงิน", receiverName: "ชื่อผู้รับ", receiverAddress: "ที่อยู่ผู้รับ", phone: "เบอร์โทร", additional: "คำแนะนำเพิ่มเติม",
     chooseReceipt: "เลือกรูปใบเสร็จ", receiptHint: "JPG, PNG หรือ WEBP - ไม่เกิน 5 MB", uploading: "กำลังอัปโหลด...", submitProof: "ส่งหลักฐานการชำระเงิน",
     receiptSubmitted: "ส่งใบเสร็จแล้ว", receiptReview: "ร้านค้าจะตรวจสอบหลักฐานด้วยตนเอง", trackingKicker: "ติดตามพัสดุ", carrier: "บริษัทขนส่ง",
     trackingPending: "รอเลขติดตามพัสดุ", copyTracking: "คัดลอกเลขติดตาม", summary: "สรุปยอด", subtotal: "ค่าสินค้า", shipping: "ค่าจัดส่ง",
-    pending: "รอยืนยัน", total: "ยอดรวม", pendingQuote: "รอตรวจสอบค่าจัดส่ง", rateSnapshot: "อัตราแลกเปลี่ยนที่บันทึกไว้", delivery: "ที่อยู่จัดส่ง", edit: "แก้ไข",
+    pending: "รอยืนยัน", total: "ยอดรวม", pendingQuote: "รอตรวจสอบค่าจัดส่ง", delivery: "ที่อยู่จัดส่ง", edit: "แก้ไข",
     name: "ชื่อ", address: "ที่อยู่", saving: "กำลังบันทึก...", saveAddress: "บันทึกที่อยู่",
   },
 } as const;
@@ -188,7 +188,7 @@ export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: strin
             {order.lines.map((line) => {
               const product = products.find((item) => item.id === line.productId);
               const productName = preferences.locale === "th" && product ? product.nameTh : line.name;
-              return <div className="order-line" key={line.productId}><div className="order-line-thumb">{product?.imageUrls?.[0] ? <Image src={product.imageUrls[0]} alt={productName} fill sizes="54px" /> : <Receipt />}</div><div className="order-line-copy"><span>{line.sku}</span><strong>{productName}</strong><small>{t.quantity} {line.quantity}</small></div><strong>{formatMoney(line.unitPriceThb * line.quantity, order.address.countryCode, preferences.locale, order.exchangeRate)}</strong></div>;
+              return <div className="order-line" key={line.productId}><div className="order-line-thumb">{product?.imageUrls?.[0] ? <Image src={product.imageUrls[0]} alt={productName} fill sizes="54px" /> : <Receipt />}</div><div className="order-line-copy"><span>{line.sku}</span><strong>{productName}</strong><small>{t.quantity} {line.quantity}</small></div><strong>{formatMoney(line.unitPriceThb * line.quantity, order.address.countryCode, preferences.locale)}</strong></div>;
             })}
           </section>
 
@@ -196,7 +196,7 @@ export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: strin
 
           {quoteNeedsAcceptance && <section className="order-panel shipping-quote-panel">
             <div className="panel-heading"><div><span>{t.quoteKicker}</span><h2>{t.quoteTitle}</h2></div></div>
-            <div className="shipping-quote-total"><div><span>{t.itemSubtotal}</span><strong>{formatMoney(order.subtotalThb, order.address.countryCode, preferences.locale, order.exchangeRate)}</strong></div><div><span>{t.thailandPostShipping}</span><strong>{formatMoney(order.shippingFeeThb ?? 0, order.address.countryCode, preferences.locale, order.exchangeRate)}</strong></div><div><span>{t.totalEstimate}</span><strong>{formatMoney(totalThb, order.address.countryCode, preferences.locale, order.exchangeRate)}</strong></div><small>{t.quoteNote}</small></div>
+            <div className="shipping-quote-total"><div><span>{t.itemSubtotal}</span><strong>{formatMoney(order.subtotalThb, order.address.countryCode, preferences.locale)}</strong></div><div><span>{t.thailandPostShipping}</span><strong>{formatMoney(order.shippingFeeThb ?? 0, order.address.countryCode, preferences.locale)}</strong></div><div><span>{t.totalEstimate}</span><strong>{formatMoney(totalThb, order.address.countryCode, preferences.locale)}</strong></div><small>{t.quoteNote}</small></div>
             <div className="shipping-quote-actions"><button className="shop-secondary-button" disabled={busy} onClick={cancel}>{t.declineCancel}</button><button className="shop-primary-button" disabled={busy || reservationExpired} onClick={acceptQuote}>{busy ? t.confirming : t.acceptQuote}</button></div>
           </section>}
 
@@ -212,7 +212,7 @@ export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: strin
                 <div className="bank-account-number"><dt>{t.accountNumber}</dt><dd><strong>{payment.account_number || t.contactStore}</strong>{payment.account_number && <button type="button" onClick={() => void copyBankAccount(payment.account_number!)} aria-label={t.copyAccount} title={t.copyAccount}>{copiedBankAccount ? <Check /> : <Copy />}</button>}</dd></div>
               </dl>
             </div> : <div className="western-union-details">
-              <div className="western-union-heading"><div><span>{t.amountToSend}</span><strong>{formatMoney(totalThb, "TH", preferences.locale, 1)}</strong><small>{t.approx} {formatMoney(totalThb, order.address.countryCode, preferences.locale, order.exchangeRate)}</small></div><button type="button" onClick={() => void copyWesternUnionDetails()}>{copiedWesternUnion ? <Check /> : <Copy />}{copiedWesternUnion ? t.copied : t.copyAll}</button></div>
+              <div className="western-union-heading"><div><span>{t.amountToSend}</span><strong>{formatMoney(totalThb, "TH", preferences.locale)}</strong></div><button type="button" onClick={() => void copyWesternUnionDetails()}>{copiedWesternUnion ? <Check /> : <Copy />}{copiedWesternUnion ? t.copied : t.copyAll}</button></div>
               <p className="western-union-note">{t.westernNote}</p>
               <dl>
                 <div><dt>{t.paymentMethod}</dt><dd>Western Union</dd></div>
@@ -239,10 +239,9 @@ export function OrderDetail({ orderNumber, user, isAdmin }: { orderNumber: strin
         <aside className="order-side-column">
           <section className="order-panel">
             <div className="panel-heading"><h2>{t.summary}</h2></div>
-            <div className="summary-row"><span>{t.subtotal}</span><strong>{formatMoney(order.subtotalThb, order.address.countryCode, preferences.locale, order.exchangeRate)}</strong></div>
-            <div className="summary-row"><span>{t.shipping}</span><strong>{order.shippingFeeThb === null ? t.pending : formatMoney(order.shippingFeeThb, order.address.countryCode, preferences.locale, order.exchangeRate)}</strong></div>
-            <div className="summary-row total"><span>{t.total}</span><strong>{order.shippingFeeThb === null ? t.pendingQuote : formatMoney(totalThb, order.address.countryCode, preferences.locale, order.exchangeRate)}</strong></div>
-            <small>{t.rateSnapshot}: 1 THB = {order.exchangeRate} {order.currency}</small>
+            <div className="summary-row"><span>{t.subtotal}</span><strong>{formatMoney(order.subtotalThb, order.address.countryCode, preferences.locale)}</strong></div>
+            <div className="summary-row"><span>{t.shipping}</span><strong>{order.shippingFeeThb === null ? t.pending : formatMoney(order.shippingFeeThb, order.address.countryCode, preferences.locale)}</strong></div>
+            <div className="summary-row total"><span>{t.total}</span><strong>{order.shippingFeeThb === null ? t.pendingQuote : formatMoney(totalThb, order.address.countryCode, preferences.locale)}</strong></div>
           </section>
 
           <section className="order-panel">

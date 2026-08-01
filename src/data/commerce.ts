@@ -40,11 +40,12 @@ export function getCountry(code: CountryCode) {
   return countries.find((country) => country.code === code) ?? countries[0];
 }
 
-export function formatMoney(priceThb: number, countryCode: CountryCode, locale: "en" | "th", rateFromThb?: number) {
-  const country = getCountry(countryCode);
+export function formatMoney(priceThb: number, _countryCode: CountryCode = "TH", locale: "en" | "th" = "en", _rateFromThb?: number) {
+  void _countryCode;
+  void _rateFromThb;
   return new Intl.NumberFormat(locale === "th" ? "th-TH" : "en-US", {
     style: "currency",
-    currency: country.currency,
-    maximumFractionDigits: country.currency === "THB" ? 0 : 2,
-  }).format(priceThb * (rateFromThb ?? country.rate));
+    currency: "THB",
+    maximumFractionDigits: 0,
+  }).format(priceThb);
 }

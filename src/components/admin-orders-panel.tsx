@@ -22,7 +22,7 @@ const pageSize = 15;
 
 function displayTotal(order: AdminOrder) {
   if (order.totalThb === null) return "รอแจ้งค่าจัดส่ง";
-  return `${order.currency} ${(order.totalThb * order.exchangeRate).toLocaleString("th-TH", { maximumFractionDigits: 2 })}`;
+  return `THB ${order.totalThb.toLocaleString("th-TH")}`;
 }
 
 function deliveryFrom(order: AdminOrder): DeliveryDraft {

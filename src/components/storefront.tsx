@@ -70,7 +70,7 @@ export function ProductVisual({ product, imageUrl = product.imageUrls?.[0] }: { 
 }
 
 export function Storefront({ user, showHero = true }: { user: CustomerUser | null; isAdmin?: boolean; showHero?: boolean }) {
-  const { preferences, addToCart, products, exchangeRates } = useShop();
+  const { preferences, addToCart, products } = useShop();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
   const [model, setModel] = useState("");
@@ -178,13 +178,13 @@ export function Storefront({ user, showHero = true }: { user: CustomerUser | nul
               <FilterSelect allLabel={t.all} label={t.stock} value={stock} options={Object.keys(stockCopy)} optionLabel={(value) => stockCopy[value as StockStatus][preferences.locale]} onChange={(value) => { setStock(value); setVisibleCount(PAGE_SIZE); }} />
             </aside>
             <div className="product-region">
-              <div className="result-row"><span>{t.showing} {Math.min(visibleCount, filteredProducts.length)} {t.of} {filteredProducts.length} {t.results}</span><span>{preferences.locale === "th" ? country.nameTh : country.name} · {country.currency}</span></div>
+              <div className="result-row"><span>{t.showing} {Math.min(visibleCount, filteredProducts.length)} {t.of} {filteredProducts.length} {t.results}</span><span>{preferences.locale === "th" ? country.nameTh : country.name} · THB</span></div>
               {filteredProducts.length ? <><div className="product-grid">{visibleProducts.map((product) => {
                 const canBuy = product.stockStatus === "in_stock" || product.stockStatus === "low_stock";
                 const added = addedProductId === product.id;
                 return <article className={`product-card ${added ? "product-card-added" : ""}`} key={product.id}>
                   <Link href={`/products/${product.slug}`} className="product-card-link"><ProductVisual product={product} /></Link>
-                  <div className="product-info"><div className={`stock-status ${product.stockStatus}`}><span />{stockCopy[product.stockStatus][preferences.locale]}</div><p className="product-brand">{product.brand}</p><h3><Link href={`/products/${product.slug}`}>{preferences.locale === "th" ? product.nameTh : product.name}</Link></h3><p className="fitment">{(product.fitments?.length ? product.fitments.map((fitment) => `${fitment.model} ${fitment.yearFrom}-${fitment.yearTo}`) : [`${product.models.join(" · ")} ${product.yearFrom}-${product.yearTo}`]).join(" · ")}</p><div className="product-footer"><strong>{formatMoney(product.priceThb, preferences.countryCode, preferences.locale, exchangeRates[country.currency])}</strong><button className={added ? "added" : ""} disabled={!canBuy} onClick={() => void addProduct(product.id)} aria-label={`${t.add}: ${product.name}`}>{canBuy ? added ? <><Check aria-hidden="true" />{t.added}</> : <><ShoppingBag aria-hidden="true" />{t.add}</> : t.soldOut}</button></div></div>
+                  <div className="product-info"><div className={`stock-status ${product.stockStatus}`}><span />{stockCopy[product.stockStatus][preferences.locale]}</div><p className="product-brand">{product.brand}</p><h3><Link href={`/products/${product.slug}`}>{preferences.locale === "th" ? product.nameTh : product.name}</Link></h3><p className="fitment">{(product.fitments?.length ? product.fitments.map((fitment) => `${fitment.model} ${fitment.yearFrom}-${fitment.yearTo}`) : [`${product.models.join(" · ")} ${product.yearFrom}-${product.yearTo}`]).join(" · ")}</p><div className="product-footer"><strong>{formatMoney(product.priceThb, preferences.countryCode, preferences.locale)}</strong><button className={added ? "added" : ""} disabled={!canBuy} onClick={() => void addProduct(product.id)} aria-label={`${t.add}: ${product.name}`}>{canBuy ? added ? <><Check aria-hidden="true" />{t.added}</> : <><ShoppingBag aria-hidden="true" />{t.add}</> : t.soldOut}</button></div></div>
                 </article>;
               })}</div>{visibleCount < filteredProducts.length && <button className="catalog-load-more" onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}>{t.loadMore}<ChevronDown aria-hidden="true" /></button>}</> : <div className="empty-state"><Search /><h3>{t.emptyTitle}</h3><p>{t.emptyText}</p><button onClick={resetFilters}>{t.clear}</button></div>}
             </div>

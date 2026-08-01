@@ -24,7 +24,7 @@ export function FirstVisitLanguage({ ready, onSelect }: { ready: boolean; onSele
         <button className={locale === "en" ? "selected" : ""} onClick={() => setLocale("en")}><span><small>EN</small><strong>English</strong></span></button>
         <button className={locale === "th" ? "selected" : ""} onClick={() => setLocale("th")}><span><small>TH</small><strong>ภาษาไทย</strong></span></button>
       </div>
-      <label className="first-visit-country"><span><Globe2 />{locale === "th" ? "ประเทศและสกุลเงิน" : "Country and currency"}</span><select value={countryCode} onChange={(event) => setCountryCode(event.target.value as CountryCode)}><option value="" disabled>{locale === "th" ? "เลือกประเทศ" : "Select country"}</option>{countries.map((country) => <option key={country.code} value={country.code}>{country.name} · {country.currency}</option>)}</select></label>
+      <label className="first-visit-country"><span><Globe2 />{locale === "th" ? "ประเทศจัดส่ง" : "Delivery country"}</span><select value={countryCode} onChange={(event) => setCountryCode(event.target.value as CountryCode)}><option value="" disabled>{locale === "th" ? "เลือกประเทศ" : "Select country"}</option>{countries.map((country) => <option key={country.code} value={country.code}>{locale === "th" ? country.nameTh : country.name}</option>)}</select></label>
       <button className="first-visit-continue" disabled={!countryCode} onClick={() => countryCode && onSelect(locale, countryCode)}>{locale === "th" ? "เข้าสู่ร้านค้า" : "Enter shop"}<ArrowRight /></button>
     </div> : <span className="first-visit-loading">Loading...</span>}
   </div>;

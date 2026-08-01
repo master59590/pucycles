@@ -24,7 +24,7 @@ export function SetupForm() {
     <h1>Set your shopping region</h1>
     <p>Prices, payment instructions, and delivery steps will match your country.</p>
     <fieldset><legend>Language</legend><div className="choice-grid"><button className={locale === "en" ? "selected" : ""} onClick={() => setLocale("en")}><span>EN</span><strong>English</strong>{locale === "en" && <Check />}</button><button className={locale === "th" ? "selected" : ""} onClick={() => setLocale("th")}><span>TH</span><strong>ภาษาไทย</strong>{locale === "th" && <Check />}</button></div></fieldset>
-    <label className="setup-country"><span>Country</span><select value={countryCode} onChange={(event) => setCountryCode(event.target.value as CountryCode)}>{countries.map((country) => <option key={country.code} value={country.code}>{country.name} · {country.currency}</option>)}</select></label>
+    <label className="setup-country"><span>Country</span><select value={countryCode} onChange={(event) => setCountryCode(event.target.value as CountryCode)}>{countries.map((country) => <option key={country.code} value={country.code}>{country.name}</option>)}</select></label>
     <button className="shop-primary-button" onClick={continueToShop}>Continue to shop</button>
   </div>;
 }

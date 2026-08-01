@@ -6,7 +6,7 @@ import type { Product } from "@/data/catalog";
 import { FirstVisitLanguage } from "@/components/first-visit-language";
 import { createClient } from "@/lib/supabase/client";
 import { customerErrorMessage } from "@/lib/customer-error";
-import type { CartLine, CheckoutAddress, CountryCode, CurrencyCode, CustomerOrder, ExchangeRates, Locale, OrderStatus, PaymentInstructions, ShopPreferences } from "@/types/shop";
+import type { CartLine, CheckoutAddress, CountryCode, CurrencyCode, CustomerOrder, Locale, OrderStatus, PaymentInstructions, ShopPreferences } from "@/types/shop";
 
 type ShopState = {
   preferences: ShopPreferences;
@@ -20,7 +20,6 @@ type ShopContextValue = ShopState & {
   shopError: string;
   cartCount: number;
   products: Product[];
-  exchangeRates: ExchangeRates;
   setPreferences: (preferences: ShopPreferences) => void;
   addToCart: (productId: string, quantity?: number) => Promise<void>;
   updateCart: (productId: string, quantity: number) => Promise<void>;
@@ -148,7 +147,7 @@ function mapOrder(order: DbOrder): CustomerOrder {
   };
 }
 
-export function ShopProvider({ children, catalogProducts, exchangeRates }: { children: React.ReactNode; catalogProducts: Product[]; exchangeRates: ExchangeRates }) {
+export function ShopProvider({ children, catalogProducts }: { children: React.ReactNode; catalogProducts: Product[] }) {
   const pathname = usePathname();
   const supabase = useMemo(() => createClient(), []);
   const [state, setState] = useState<ShopState>(initialState);
@@ -262,7 +261,6 @@ export function ShopProvider({ children, catalogProducts, exchangeRates }: { chi
     hydrated,
     shopError,
     products: catalogProducts,
-    exchangeRates,
     cartCount: state.cart.reduce((sum, line) => sum + line.quantity, 0),
     setPreferences: (preferences) => {
       setState((current) => ({ ...current, preferences, setupComplete: true }));
@@ -370,7 +368,7 @@ export function ShopProvider({ children, catalogProducts, exchangeRates }: { chi
       if (error) throw error;
       await loadOrders();
     },
-  }), [catalogProducts, exchangeRates, hydrated, loadOrders, persistCartItem, shopError, state, supabase]);
+  }), [catalogProducts, hydrated, loadOrders, persistCartItem, shopError, state, supabase]);
 
   return <ShopContext.Provider value={value}>
     {children}

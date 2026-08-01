@@ -58,11 +58,11 @@ export const policySections = [
     title: "Terms of sale",
     titleTh: "เงื่อนไขการขาย",
     body: [
-      "Product prices are based in Thai baht. Other currencies use the shop exchange rate for display and are saved with the order. A submitted order reserves stock only until the payment deadline shown on the order.",
+      "All product prices and payment totals are shown in Thai baht (THB). A submitted order reserves stock only until the payment deadline shown on the order.",
       "Payment is confirmed only after the store approves the uploaded receipt. PUCYCLES may cancel and release stock for expired, unpaid, fraudulent, or unverifiable orders.",
     ],
     bodyTh: [
-      "ราคาสินค้ามีเงินบาทเป็นราคาหลัก สกุลเงินอื่นคำนวณด้วยอัตราแลกเปลี่ยนของร้านและบันทึกไว้กับคำสั่งซื้อ การสร้างคำสั่งซื้อจะจองสินค้าไว้ถึงกำหนดชำระที่แสดงในออเดอร์เท่านั้น",
+      "ราคาสินค้าและยอดชำระทั้งหมดแสดงเป็นเงินบาท (THB) การสร้างคำสั่งซื้อจะจองสินค้าไว้ถึงกำหนดชำระที่แสดงในออเดอร์เท่านั้น",
       "ถือว่าชำระเงินสำเร็จเมื่อร้านตรวจและอนุมัติหลักฐานแล้ว PUCYCLES อาจยกเลิกและคืนสต็อกสำหรับออเดอร์ที่หมดเวลา ไม่ชำระ มีความเสี่ยงทุจริต หรือไม่สามารถตรวจสอบได้",
     ],
   },

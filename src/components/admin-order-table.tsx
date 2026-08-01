@@ -16,7 +16,7 @@ export function AdminOrderTable({ orders, limit }: { orders: AdminOrder[]; limit
               <td><strong>{order.orderNumber}</strong></td>
               <td>{order.customer}</td>
               <td>{order.country}</td>
-              <td>{order.totalThb === null ? "รอค่าจัดส่ง" : `${order.currency} ${(order.totalThb * order.exchangeRate).toLocaleString("th-TH", { maximumFractionDigits: 2 })}`}</td>
+              <td>{order.totalThb === null ? "รอค่าจัดส่ง" : `THB ${order.totalThb.toLocaleString("th-TH")}`}</td>
               <td><span className={`admin-status ${order.status}`}>{adminOrderStatusCopy[order.status]}</span></td>
               <td>{new Date(order.createdAt).toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" })}</td>
               <td><Link className="table-icon-button" href={`/admin/orders?order=${order.id}`} aria-label={`เปิดคำสั่งซื้อ ${order.orderNumber}`} title="เปิดคำสั่งซื้อ"><ArrowUpRight /></Link></td>
