@@ -40,6 +40,14 @@ ADMIN_LOGIN_EMAIL=admin@pucycles.local
 
 Never store the admin password, service-role key, or `.env.local` in Git.
 
+## SEO & Discovery Infrastructure
+
+- **Dynamic Metadata & Open Graph**: Auto-generated product titles, descriptions, and social preview cards for LINE, Facebook, Twitter, and messaging apps.
+- **Dynamic XML Sitemap**: Generated at `/sitemap.xml` listing all active products and static pages from Supabase.
+- **Robots Directives**: Configured at `/robots.txt` protecting admin and checkout paths while enabling search engine crawling.
+- **Structured Data (Schema.org / JSON-LD)**: Injected `Product`, `Offer`, `BreadcrumbList`, `WebSite`, and `Organization` schemas for rich search results.
+- **Google Search Console**: Integrated and verified for real-time indexing.
+
 ## Deployment and data
 
 The Next.js app can be deployed to Vercel or another Node.js host. Products, stock, orders, users, payment proofs, and product images are stored in Supabase Postgres/Auth/Storage, not on the web host.

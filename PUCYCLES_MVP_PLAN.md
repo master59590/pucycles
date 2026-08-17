@@ -400,6 +400,25 @@ For the current traffic level, free hosting should be enough. The main yearly co
 - Payment proof review is manual, so order status must be very clear.
 - Product fitment data must be entered carefully by admin, because customers depend on model/year filtering.
 
+## SEO & Organic Growth Infrastructure (V1 Implemented)
+
+### 1. Search Engine Optimization (SEO)
+- **Framework**: Server-Side Rendering (SSR) & React Server Components (RSC) via Next.js App Router for instant search engine indexing.
+- **Dynamic Metadata**: Automatic product-specific titles, descriptions, and keywords.
+- **Dynamic XML Sitemap**: Auto-generated `/sitemap.xml` dynamically populated from Supabase catalog products.
+- **Robots Directives**: Configured `/robots.txt` granting search engines access to storefront pages while protecting `/admin`, `/checkout`, `/orders`, and `/setup`.
+- **Google Search Console Integration**: Site ownership verified and sitemap submitted with 100% pass score.
+
+### 2. Structured Data (Schema.org / JSON-LD)
+- **Product Schema**: Injected schema with exact SKU, THB price, real-time stock availability, brand, and vehicle model fitment.
+- **Merchant Listings Compliance**: Implemented `MerchantReturnPolicy` and `OfferShippingDetails` for rich Google Shopping results.
+- **BreadcrumbList Schema**: Structured navigation path for Google Search result snippets.
+- **Organization & WebSite Schema**: SearchAction and brand identity metadata for Google Knowledge Graph.
+
+### 3. Social Commerce & Sharing Optimization (Open Graph)
+- **Multi-Platform Support**: High-resolution preview cards for LINE, Facebook Post, Instagram, Twitter/X, and Messenger.
+- **Smart UX**: Removed initial blocking modal gate, allowing zero-friction instant product viewing on first click from social channels.
+
 ## Recommended Next Step
 
-Create wireframes for the customer storefront and admin dashboard, then decide the exact tech stack before implementation.
+Create wireframes for future custom motorcycle builder features and continue monitoring Google Search Console performance analytics.

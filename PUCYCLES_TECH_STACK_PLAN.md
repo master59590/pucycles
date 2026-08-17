@@ -240,6 +240,14 @@ Important: pricing and free-tier rules can change. Check the official pricing pa
 13. Test mobile and desktop
 14. Deploy to Vercel
 
+### SEO & Discovery Architecture
+
+- **Next.js Metadata API**: Centralized SEO in `src/lib/seo.ts`, dynamic Open Graph and Twitter cards in `layout.tsx` and product dynamic routes.
+- **Dynamic XML Sitemap**: `src/app/sitemap.ts` generates `/sitemap.xml` dynamically from database products.
+- **Robots Directives**: `src/app/robots.ts` controls crawler indexing and protects admin/checkout paths.
+- **Structured Data (JSON-LD)**: Schema.org `Product`, `Offer`, `BreadcrumbList`, `WebSite`, and `Organization` schemas embedded for Google Rich Results.
+- **Google Search Console**: Verified property with automated sitemap processing.
+
 ## Decision
 
 Use:
@@ -251,5 +259,6 @@ Use:
 - Supabase Postgres
 - Supabase Storage
 - Vercel
+- Google Search Console (SEO Infrastructure)
 
 Keep Cloudinary as a later upgrade only if image optimization becomes a real need.
