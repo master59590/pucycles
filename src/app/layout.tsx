@@ -35,11 +35,20 @@ export const metadata: Metadata = {
     siteName: defaultSeo.name,
     title: defaultSeo.title,
     description: defaultSeo.description,
+    images: [
+      {
+        url: `${getSiteUrl()}/pucycles-logo.jpg`,
+        width: 1200,
+        height: 630,
+        alt: defaultSeo.name,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: defaultSeo.title,
     description: defaultSeo.description,
+    images: [`${getSiteUrl()}/pucycles-logo.jpg`],
   },
 };
 
