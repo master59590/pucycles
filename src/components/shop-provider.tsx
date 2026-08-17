@@ -3,7 +3,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { Product } from "@/data/catalog";
-import { FirstVisitLanguage } from "@/components/first-visit-language";
 import { createClient } from "@/lib/supabase/client";
 import { customerErrorMessage } from "@/lib/customer-error";
 import type { CartLine, CheckoutAddress, CountryCode, CurrencyCode, CustomerOrder, Locale, OrderStatus, PaymentInstructions, ShopPreferences } from "@/types/shop";
@@ -75,8 +74,8 @@ type DbOrder = {
 const PREFERENCES_KEY = "pucycles-preferences-v1";
 const GUEST_CART_KEY = "pucycles-guest-cart-v1";
 const initialState: ShopState = {
-  preferences: { locale: "en", countryCode: "TH" },
-  setupComplete: false,
+  preferences: { locale: "th", countryCode: "TH" },
+  setupComplete: true,
   cart: [],
   orders: [],
 };
@@ -84,14 +83,14 @@ const initialState: ShopState = {
 const ShopContext = createContext<ShopContextValue | null>(null);
 
 function parsePreferences(value: string | null): Pick<ShopState, "preferences" | "setupComplete"> {
-  if (!value) return { preferences: initialState.preferences, setupComplete: false };
+  if (!value) return { preferences: initialState.preferences, setupComplete: true };
   try {
     const parsed = JSON.parse(value) as { locale?: Locale; countryCode?: CountryCode };
-    const locale = parsed.locale === "th" ? "th" : "en";
+    const locale = parsed.locale === "en" ? "en" : "th";
     const countryCode = ["TH", "AT", "AU", "PH", "AE", "IN"].includes(parsed.countryCode ?? "") ? parsed.countryCode as CountryCode : "TH";
     return { preferences: { locale, countryCode }, setupComplete: true };
   } catch {
-    return { preferences: initialState.preferences, setupComplete: false };
+    return { preferences: initialState.preferences, setupComplete: true };
   }
 }
 
@@ -231,18 +230,9 @@ export function ShopProvider({ children, catalogProducts }: { children: React.Re
     window.localStorage.setItem(GUEST_CART_KEY, JSON.stringify(state.cart));
   }, [hydrated, state.cart]);
 
-  const showLanguageGate = !pathname.startsWith("/admin") && hydrated && !state.setupComplete;
-
   useEffect(() => {
     document.documentElement.lang = state.preferences.locale;
   }, [state.preferences.locale]);
-
-  useEffect(() => {
-    if (!showLanguageGate) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = previousOverflow; };
-  }, [showLanguageGate]);
 
   const persistCartItem = useCallback(async (productId: string, quantity: number) => {
     if (!userIdRef.current || !cartIdRef.current) return;
@@ -372,7 +362,6 @@ export function ShopProvider({ children, catalogProducts }: { children: React.Re
 
   return <ShopContext.Provider value={value}>
     {children}
-    {showLanguageGate && <FirstVisitLanguage ready={hydrated} onSelect={(locale, countryCode) => value.setPreferences({ locale, countryCode })} />}
   </ShopContext.Provider>;
 }
 
