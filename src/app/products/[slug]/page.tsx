@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductDetail } from "@/components/product-detail";
 import { getCustomerSession } from "@/lib/auth/customer";
-import { getCatalogProduct, getCatalogProducts } from "@/lib/catalog";
+import { getCatalogProduct } from "@/lib/catalog";
 import { getSiteUrl } from "@/lib/seo";
 
 type Props = {

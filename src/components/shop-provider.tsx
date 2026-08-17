@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
 import type { Product } from "@/data/catalog";
 import { createClient } from "@/lib/supabase/client";
 import { customerErrorMessage } from "@/lib/customer-error";
@@ -147,7 +146,6 @@ function mapOrder(order: DbOrder): CustomerOrder {
 }
 
 export function ShopProvider({ children, catalogProducts }: { children: React.ReactNode; catalogProducts: Product[] }) {
-  const pathname = usePathname();
   const supabase = useMemo(() => createClient(), []);
   const [state, setState] = useState<ShopState>(initialState);
   const [hydrated, setHydrated] = useState(false);
