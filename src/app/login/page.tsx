@@ -1,9 +1,18 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, LockKeyhole } from "lucide-react";
 import { GoogleSignIn } from "@/components/google-sign-in";
 import { createClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = {
+  title: "Sign In",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function LoginPage({
   searchParams,

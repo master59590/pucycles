@@ -1,8 +1,17 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { CheckoutForm } from "@/components/checkout-form";
 import { getCustomerSession } from "@/lib/auth/customer";
 import { getSavedAddress } from "@/lib/saved-address";
 import { getThaiShippingFee } from "@/lib/shop-settings";
+
+export const metadata: Metadata = {
+  title: "Checkout",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function CheckoutPage() {
   const session = await getCustomerSession();

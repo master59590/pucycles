@@ -1,6 +1,15 @@
+import type { Metadata } from "next";
 import { AdminLogin } from "@/components/admin-login";
 import { AdminShell } from "@/components/admin-shell";
 import { createClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = {
+  title: "Admin Dashboard",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
