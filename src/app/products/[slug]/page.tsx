@@ -46,8 +46,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       alternateLocale: ["th_TH"],
       images: (images.length > 0 ? images : [`${siteUrl}/pucycles-logo.jpg`]).map((url) => ({
         url,
+        secureUrl: url,
         width: 1200,
         height: 630,
+        type: url.endsWith(".webp") ? "image/webp" : "image/jpeg",
         alt: product.name,
       })),
     },
