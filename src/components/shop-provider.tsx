@@ -231,7 +231,7 @@ export function ShopProvider({ children, catalogProducts }: { children: React.Re
     window.localStorage.setItem(GUEST_CART_KEY, JSON.stringify(state.cart));
   }, [hydrated, state.cart]);
 
-  const showLanguageGate = !pathname.startsWith("/admin") && (!hydrated || !state.setupComplete);
+  const showLanguageGate = !pathname.startsWith("/admin") && hydrated && !state.setupComplete;
 
   useEffect(() => {
     document.documentElement.lang = state.preferences.locale;

@@ -64,13 +64,17 @@ export default async function ProductPage({ params }: Props) {
   const session = await getCustomerSession();
   const siteUrl = getSiteUrl();
 
+  const productImages = product.imageUrls && product.imageUrls.length > 0
+    ? product.imageUrls
+    : [`${siteUrl}/pucycles-logo.jpg`];
+
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
     description: product.description,
     sku: product.sku,
-    image: product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls : undefined,
+    image: productImages,
     brand: {
       "@type": "Brand",
       name: product.brand,
@@ -87,6 +91,26 @@ export default async function ProductPage({ params }: Props) {
       seller: {
         "@type": "Organization",
         name: "PUCYCLES",
+      },
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "TH",
+        returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 7,
+        returnMethod: "https://schema.org/ReturnByMail",
+        returnFees: "https://schema.org/FreeReturn",
+      },
+      shippingDetails: {
+        "@type": "OfferShippingDetails",
+        shippingRate: {
+          "@type": "MonetaryAmount",
+          value: 0,
+          currency: "THB",
+        },
+        shippingDestination: {
+          "@type": "DefinedRegion",
+          addressCountry: "TH",
+        },
       },
     },
   };
