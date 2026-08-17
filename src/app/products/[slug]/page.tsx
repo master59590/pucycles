@@ -42,8 +42,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: pageUrl,
       type: "website",
       siteName: "PUCYCLES",
-      images: images.map((url) => ({
+      locale: "en_US",
+      alternateLocale: ["th_TH"],
+      images: (images.length > 0 ? images : [`${siteUrl}/pucycles-logo.jpg`]).map((url) => ({
         url,
+        width: 1200,
+        height: 630,
         alt: product.name,
       })),
     },
@@ -51,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: images.length > 0 ? [images[0]] : undefined,
+      images: images.length > 0 ? [images[0]] : [`${siteUrl}/pucycles-logo.jpg`],
     },
   };
 }
