@@ -9,7 +9,6 @@ export const countries: Array<{
 }> = [
   { code: "TH", name: "Thailand", nameTh: "ประเทศไทย", currency: "THB", rate: 1 },
   { code: "AT", name: "Austria", nameTh: "ออสเตรีย", currency: "EUR", rate: 0.026 },
-  { code: "AU", name: "Australia", nameTh: "ออสเตรเลีย", currency: "AUD", rate: 0.043 },
   { code: "PH", name: "Philippines", nameTh: "ฟิลิปปินส์", currency: "PHP", rate: 1.66 },
   { code: "AE", name: "UAE / Dubai", nameTh: "สหรัฐอาหรับเอมิเรตส์ / ดูไบ", currency: "AED", rate: 0.108 },
   { code: "IN", name: "India", nameTh: "อินเดีย", currency: "INR", rate: 2.47 },

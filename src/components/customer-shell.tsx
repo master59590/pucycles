@@ -21,10 +21,6 @@ export function CustomerShell({ children, user }: { children: React.ReactNode; u
       <div className="utility-bar">
         <span>{labels.utility}</span>
         <div className="locale-controls">
-          <label className="sr-only" htmlFor="site-country">{labels.country}</label>
-          <select id="site-country" value={preferences.countryCode} onChange={(event) => setPreferences({ ...preferences, countryCode: event.target.value as typeof preferences.countryCode })}>
-            {countries.map((item) => <option key={item.code} value={item.code}>{preferences.locale === "th" ? item.nameTh : item.name}</option>)}
-          </select>
           <div className="language-switch" aria-label="Language">
             <button className={preferences.locale === "en" ? "active" : ""} onClick={() => setPreferences({ ...preferences, locale: "en" })}>EN</button>
             <button className={preferences.locale === "th" ? "active" : ""} onClick={() => setPreferences({ ...preferences, locale: "th" })}>TH</button>
