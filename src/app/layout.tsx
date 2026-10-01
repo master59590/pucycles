@@ -7,6 +7,11 @@ import { defaultSeo, getSiteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
+  icons: {
+    icon: "/logoPucycles.png",
+    shortcut: "/logoPucycles.png",
+    apple: "/logoPucycles.png",
+  },
   title: {
     default: defaultSeo.title,
     template: "%s | PUCYCLES",
